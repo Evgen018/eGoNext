@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "GoNext",
+    "slug": "egonext",
+    "version": "1.0.0",
+    "scheme": "egonext",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.egonext.app"
+    },
+    "android": {
+      "package": "com.egonext.app"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
