@@ -16,7 +16,7 @@ export default function HomeScreen() {
 
       <View style={styles.content}>
         <Text variant="titleLarge" style={styles.text}>
-          Привет, React Native Paper!
+          Привет, Evgeni!
         </Text>
         <Button mode="contained" onPress={showSnackbar}>
           Нажми меня
