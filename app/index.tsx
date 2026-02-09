@@ -1,35 +1,46 @@
-import { useState } from "react";
+import { useRouter } from "expo-router";
 import { View, StyleSheet } from "react-native";
-import { Appbar, Text, Button, Snackbar } from "react-native-paper";
+import { Appbar, Button } from "react-native-paper";
 
 export default function HomeScreen() {
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-
-  const showSnackbar = () => setSnackbarVisible(true);
-  const hideSnackbar = () => setSnackbarVisible(false);
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
       <Appbar.Header>
-        <Appbar.Content title="GoNext" />
+        <Appbar.Content title="eGoNext" />
       </Appbar.Header>
 
       <View style={styles.content}>
-        <Text variant="titleLarge" style={styles.text}>
-          Привет, Evgeni!
-        </Text>
-        <Button mode="contained" onPress={showSnackbar}>
-          Нажми меня
+        <Button
+          mode="contained"
+          onPress={() => router.push("/places")}
+          style={styles.button}
+        >
+          Места
+        </Button>
+        <Button
+          mode="contained"
+          onPress={() => router.push("/trips")}
+          style={styles.button}
+        >
+          Поездки
+        </Button>
+        <Button
+          mode="contained"
+          onPress={() => router.push("/next-place")}
+          style={styles.button}
+        >
+          Следующее место
+        </Button>
+        <Button
+          mode="contained"
+          onPress={() => router.push("/settings")}
+          style={styles.button}
+        >
+          Настройки
         </Button>
       </View>
-
-      <Snackbar
-        visible={snackbarVisible}
-        onDismiss={hideSnackbar}
-        duration={3000}
-      >
-        Кнопка нажата
-      </Snackbar>
     </View>
   );
 }
@@ -41,11 +52,11 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-    gap: 24,
+    alignItems: "stretch",
+    gap: 16,
     padding: 24,
   },
-  text: {
-    textAlign: "center",
+  button: {
+    marginHorizontal: 24,
   },
 });

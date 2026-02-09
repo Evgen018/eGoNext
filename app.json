@@ -15,7 +15,8 @@
       "package": "com.egonext.app"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-sqlite"
     ]
   }
 }
