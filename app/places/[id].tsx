@@ -42,6 +42,8 @@ export default function PlaceDetailScreen() {
       ]);
       setPlace(p ?? null);
       setPhotos(ph);
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось загрузить место.");
     } finally {
       setLoading(false);
     }
@@ -58,9 +60,13 @@ export default function PlaceDetailScreen() {
   };
 
   const handleDeletePhoto = async (photoId: number, uri: string) => {
-    await deletePlacePhoto(db, photoId);
-    await deletePhotoFile(uri);
-    loadData();
+    try {
+      await deletePlacePhoto(db, photoId);
+      await deletePhotoFile(uri);
+      loadData();
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось удалить фото.");
+    }
   };
 
   const handleEdit = () => router.push(`/places/${placeId}/edit`);
@@ -72,9 +78,13 @@ export default function PlaceDetailScreen() {
         text: "Удалить",
         style: "destructive",
         onPress: async () => {
-          await deletePlace(db, placeId);
-          for (const p of photos) await deletePhotoFile(p.uri);
-          router.replace("/places");
+          try {
+            await deletePlace(db, placeId);
+            for (const p of photos) await deletePhotoFile(p.uri);
+            router.replace("/places");
+          } catch (err) {
+            Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось удалить место.");
+          }
         },
       },
     ]);

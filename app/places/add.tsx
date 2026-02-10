@@ -42,7 +42,10 @@ export default function AddPlaceScreen() {
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") return;
+    if (status !== "granted") {
+      Alert.alert("Доступ запрещён", "Разрешите доступ к галерее в настройках приложения.");
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
@@ -75,6 +78,9 @@ export default function AddPlaceScreen() {
         await addPlacePhoto(db, id, destUri, i);
       }
       router.replace(`/places/${id}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Не удалось сохранить место.";
+      Alert.alert("Ошибка", msg);
     } finally {
       setSaving(false);
     }

@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { Appbar, TextInput, Button } from "react-native-paper";
 import { insertTrip } from "@/lib/db/trips";
@@ -28,6 +28,8 @@ export default function AddTripScreen() {
         current: false,
       });
       router.replace(`/trips/${id}`);
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось создать поездку.");
     } finally {
       setSaving(false);
     }

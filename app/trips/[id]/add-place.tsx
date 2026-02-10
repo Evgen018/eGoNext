@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, StyleSheet, FlatList, Pressable } from "react-native";
+import { View, StyleSheet, FlatList, Pressable, Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { Appbar, Text, Card } from "react-native-paper";
 import { getAllPlaces } from "@/lib/db/places";
@@ -20,21 +20,29 @@ export default function AddPlaceToTripScreen() {
   useEffect(() => {
     if (!tripId || isNaN(tripId)) return;
     const load = async () => {
-      const [allPlaces, tps] = await Promise.all([
-        getAllPlaces(db),
-        getTripPlacesByTripId(db, tripId),
-      ]);
-      setPlaces(allPlaces);
-      setAlreadyIds(new Set(tps.map((t) => t.placeId)));
+      try {
+        const [allPlaces, tps] = await Promise.all([
+          getAllPlaces(db),
+          getTripPlacesByTripId(db, tripId),
+        ]);
+        setPlaces(allPlaces);
+        setAlreadyIds(new Set(tps.map((t) => t.placeId)));
+      } catch (err) {
+        Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось загрузить данные.");
+      }
     };
     load();
   }, [tripId]);
 
   const handleSelect = async (place: Place) => {
     if (alreadyIds.has(place.id)) return;
-    await insertTripPlace(db, { tripId, placeId: place.id });
-    setAlreadyIds((prev) => new Set([...prev, place.id]));
-    router.back();
+    try {
+      await insertTripPlace(db, { tripId, placeId: place.id });
+      setAlreadyIds((prev) => new Set([...prev, place.id]));
+      router.back();
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось добавить место.");
+    }
   };
 
   const available = places.filter((p) => !alreadyIds.has(p.id));

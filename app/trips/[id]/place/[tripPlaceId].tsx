@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, Image } from "react-native";
+import { View, StyleSheet, ScrollView, Image, Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import {
   Appbar,
@@ -45,6 +45,8 @@ export default function TripPlaceEditScreen() {
       setPlaceName(p?.name ?? "?");
       const phs = await getPhotosByTripPlaceId(db, tpId);
       setPhotos(phs.map((ph) => ({ id: ph.id, uri: ph.uri })));
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось загрузить данные.");
     } finally {
       setLoading(false);
     }
@@ -58,37 +60,54 @@ export default function TripPlaceEditScreen() {
     setSaving(true);
     try {
       await updateTripPlaceNotes(db, tpId, notes.trim() || null);
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось сохранить заметки.");
     } finally {
       setSaving(false);
     }
   };
 
   const handleMarkVisited = async () => {
-    await markTripPlaceVisited(db, tpId);
-    setVisited(true);
+    try {
+      await markTripPlaceVisited(db, tpId);
+      setVisited(true);
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось отметить посещение.");
+    }
   };
 
   const handlePickPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") return;
+    if (status !== "granted") {
+      Alert.alert("Доступ запрещён", "Разрешите доступ к галерее в настройках приложения.");
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
       quality: 0.8,
     });
     if (result.canceled || !result.assets[0]) return;
-    const destUri = await copyToAppStorage(
-      result.assets[0].uri,
-      generatePhotoFilename(`trip_${tpId}`)
-    );
-    await addTripPlacePhoto(db, tpId, destUri);
-    loadData();
+    try {
+      const destUri = await copyToAppStorage(
+        result.assets[0].uri,
+        generatePhotoFilename(`trip_${tpId}`)
+      );
+      await addTripPlacePhoto(db, tpId, destUri);
+      loadData();
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось добавить фото.");
+    }
   };
 
   const handleDeletePhoto = async (photoId: number, uri: string) => {
-    await deleteTripPlacePhoto(db, photoId);
-    await deletePhotoFile(uri);
-    loadData();
+    try {
+      await deleteTripPlacePhoto(db, photoId);
+      await deletePhotoFile(uri);
+      loadData();
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось удалить фото.");
+    }
   };
 
   if (loading) {

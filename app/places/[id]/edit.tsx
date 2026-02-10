@@ -47,22 +47,30 @@ export default function EditPlaceScreen() {
 
   useEffect(() => {
     if (!placeId || isNaN(placeId)) return;
-    getPlaceById(db, placeId).then((p) => {
-      if (p) {
-        setName(p.name);
-        setDescription(p.description);
-        setVisitlater(p.visitlater === 1);
-        setLiked(p.liked === 1);
-        setLatitude(p.latitude != null ? String(p.latitude) : "");
-        setLongitude(p.longitude != null ? String(p.longitude) : "");
-      }
-      setLoading(false);
-    });
+    getPlaceById(db, placeId)
+      .then((p) => {
+        if (p) {
+          setName(p.name);
+          setDescription(p.description);
+          setVisitlater(p.visitlater === 1);
+          setLiked(p.liked === 1);
+          setLatitude(p.latitude != null ? String(p.latitude) : "");
+          setLongitude(p.longitude != null ? String(p.longitude) : "");
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось загрузить место.");
+        setLoading(false);
+      });
   }, [placeId]);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") return;
+    if (status !== "granted") {
+      Alert.alert("Доступ запрещён", "Разрешите доступ к галерее в настройках приложения.");
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
@@ -100,6 +108,8 @@ export default function EditPlaceScreen() {
         await addPlacePhoto(db, placeId, destUri, nextOrder + i);
       }
       router.replace(`/places/${placeId}`);
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось сохранить изменения.");
     } finally {
       setSaving(false);
     }

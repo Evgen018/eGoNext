@@ -53,6 +53,8 @@ export default function TripDetailScreen() {
         })
       );
       setTripPlaces(withNames);
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось загрузить поездку.");
     } finally {
       setLoading(false);
     }
@@ -63,8 +65,12 @@ export default function TripDetailScreen() {
   }, [tripId]);
 
   const handleSetCurrent = async () => {
-    await setCurrentTrip(db, tripId);
-    loadData();
+    try {
+      await setCurrentTrip(db, tripId);
+      loadData();
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось установить текущую поездку.");
+    }
   };
 
   const handleDelete = () => {
@@ -74,13 +80,17 @@ export default function TripDetailScreen() {
         text: "Удалить",
         style: "destructive",
         onPress: async () => {
-          const tps = await getTripPlacesByTripId(db, tripId);
-          for (const tp of tps) {
-            const phs = await getPhotosByTripPlaceId(db, tp.id);
-            for (const ph of phs) await deletePhotoFile(ph.uri);
+          try {
+            const tps = await getTripPlacesByTripId(db, tripId);
+            for (const tp of tps) {
+              const phs = await getPhotosByTripPlaceId(db, tp.id);
+              for (const ph of phs) await deletePhotoFile(ph.uri);
+            }
+            await deleteTrip(db, tripId);
+            router.replace("/trips");
+          } catch (err) {
+            Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось удалить поездку.");
           }
-          await deleteTrip(db, tripId);
-          router.replace("/trips");
         },
       },
     ]);
@@ -89,18 +99,30 @@ export default function TripDetailScreen() {
   const handleAddPlace = () => router.push(`/trips/${tripId}/add-place`);
 
   const handleMoveUp = async (tp: TripPlaceWithPlace) => {
-    await swapTripPlaceOrder(db, tp.id, "up");
-    loadData();
+    try {
+      await swapTripPlaceOrder(db, tp.id, "up");
+      loadData();
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось изменить порядок.");
+    }
   };
 
   const handleMoveDown = async (tp: TripPlaceWithPlace) => {
-    await swapTripPlaceOrder(db, tp.id, "down");
-    loadData();
+    try {
+      await swapTripPlaceOrder(db, tp.id, "down");
+      loadData();
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось изменить порядок.");
+    }
   };
 
   const handleMarkVisited = async (tp: TripPlaceWithPlace) => {
-    await markTripPlaceVisited(db, tp.id);
-    loadData();
+    try {
+      await markTripPlaceVisited(db, tp.id);
+      loadData();
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось отметить посещение.");
+    }
   };
 
   const handleRemovePlace = (tp: TripPlaceWithPlace) => {
@@ -110,8 +132,12 @@ export default function TripDetailScreen() {
         text: "Убрать",
         style: "destructive",
         onPress: async () => {
-          await deleteTripPlace(db, tp.id);
-          loadData();
+          try {
+            await deleteTripPlace(db, tp.id);
+            loadData();
+          } catch (err) {
+            Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось убрать место.");
+          }
         },
       },
     ]);

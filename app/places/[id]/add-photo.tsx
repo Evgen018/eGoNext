@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { Appbar, Button, Text } from "react-native-paper";
 import { addPlacePhoto } from "@/lib/db/placePhotos";
@@ -17,7 +17,10 @@ export default function AddPlacePhotoScreen() {
   const pickAndSave = async () => {
     if (!placeId || isNaN(placeId)) return;
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") return;
+    if (status !== "granted") {
+      Alert.alert("Доступ запрещён", "Разрешите доступ к галерее в настройках приложения.");
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
@@ -32,6 +35,8 @@ export default function AddPlacePhotoScreen() {
       );
       await addPlacePhoto(db, placeId, destUri);
       router.replace(`/places/${placeId}`);
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось добавить фото.");
     } finally {
       setSaving(false);
     }
