@@ -52,11 +52,12 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "stretch",
+    alignItems: "center",
     gap: 16,
     padding: 24,
   },
   button: {
-    marginHorizontal: 24,
+    alignSelf: "center",
+    minWidth: 0,
   },
 });
