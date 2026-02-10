@@ -1,9 +1,10 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { Appbar, TextInput, Button, Switch, Text } from "react-native-paper";
 import { getPlaceById, updatePlace } from "@/lib/db/places";
+import { getCurrentCoords } from "@/lib/location";
 import { getPhotosByPlaceId } from "@/lib/db/placePhotos";
 import { addPlacePhoto } from "@/lib/db/placePhotos";
 import { copyToAppStorage, generatePhotoFilename } from "@/lib/storage/photos";
@@ -24,6 +25,25 @@ export default function EditPlaceScreen() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newPhotoUris, setNewPhotoUris] = useState<string[]>([]);
+  const [loadingLoc, setLoadingLoc] = useState(false);
+
+  const handleGetLocation = async () => {
+    setLoadingLoc(true);
+    try {
+      const coords = await getCurrentCoords();
+      if (coords) {
+        setLatitude(coords.latitude.toFixed(6));
+        setLongitude(coords.longitude.toFixed(6));
+      } else {
+        Alert.alert(
+          "Доступ запрещён",
+          "Разрешите доступ к геолокации в настройках приложения."
+        );
+      }
+    } finally {
+      setLoadingLoc(false);
+    }
+  };
 
   useEffect(() => {
     if (!placeId || isNaN(placeId)) return;
@@ -131,6 +151,15 @@ export default function EditPlaceScreen() {
           <Text>Понравилось</Text>
           <Switch value={liked} onValueChange={setLiked} />
         </View>
+        <Button
+          mode="outlined"
+          icon="map-marker"
+          onPress={handleGetLocation}
+          loading={loadingLoc}
+          style={styles.input}
+        >
+          Текущая позиция
+        </Button>
         <TextInput
           label="Широта"
           value={latitude}

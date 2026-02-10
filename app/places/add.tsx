@@ -1,9 +1,10 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { Appbar, TextInput, Button, Switch, Text } from "react-native-paper";
 import { insertPlace } from "@/lib/db/places";
+import { getCurrentCoords } from "@/lib/location";
 import { addPlacePhoto } from "@/lib/db/placePhotos";
 import { copyToAppStorage, generatePhotoFilename } from "@/lib/storage/photos";
 import * as ImagePicker from "expo-image-picker";
@@ -19,6 +20,25 @@ export default function AddPlaceScreen() {
   const [longitude, setLongitude] = useState("");
   const [saving, setSaving] = useState(false);
   const [photoUris, setPhotoUris] = useState<string[]>([]);
+  const [loadingLoc, setLoadingLoc] = useState(false);
+
+  const handleGetLocation = async () => {
+    setLoadingLoc(true);
+    try {
+      const coords = await getCurrentCoords();
+      if (coords) {
+        setLatitude(coords.latitude.toFixed(6));
+        setLongitude(coords.longitude.toFixed(6));
+      } else {
+        Alert.alert(
+          "Доступ запрещён",
+          "Разрешите доступ к геолокации в настройках приложения."
+        );
+      }
+    } finally {
+      setLoadingLoc(false);
+    }
+  };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -92,6 +112,15 @@ export default function AddPlaceScreen() {
           <Text>Понравилось</Text>
           <Switch value={liked} onValueChange={setLiked} />
         </View>
+        <Button
+          mode="outlined"
+          icon="map-marker"
+          onPress={handleGetLocation}
+          loading={loadingLoc}
+          style={styles.input}
+        >
+          Текущая позиция
+        </Button>
         <TextInput
           label="Широта"
           value={latitude}
