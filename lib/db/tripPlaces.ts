@@ -77,3 +77,21 @@ export async function updateTripPlaceNotes(db: SQLiteDatabase, id: number, notes
 export async function deleteTripPlace(db: SQLiteDatabase, id: number): Promise<void> {
   await db.runAsync("DELETE FROM trip_places WHERE id = ?", id);
 }
+
+/** Поменять порядок двух мест в поездке (для move up/down). */
+export async function swapTripPlaceOrder(
+  db: SQLiteDatabase,
+  tripPlaceId: number,
+  direction: "up" | "down"
+): Promise<void> {
+  const item = await getTripPlaceById(db, tripPlaceId);
+  if (!item) return;
+  const all = await getTripPlacesByTripId(db, item.tripId);
+  const idx = all.findIndex((t) => t.id === tripPlaceId);
+  if (idx < 0) return;
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= all.length) return;
+  const other = all[swapIdx];
+  await db.runAsync('UPDATE trip_places SET "order" = ? WHERE id = ?', other.order, item.id);
+  await db.runAsync('UPDATE trip_places SET "order" = ? WHERE id = ?', item.order, other.id);
+}
