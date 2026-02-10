@@ -1,4 +1,10 @@
-import * as FileSystem from "expo-file-system";
+import {
+  documentDirectory,
+  makeDirectoryAsync,
+  getInfoAsync,
+  copyAsync,
+  deleteAsync,
+} from "expo-file-system/legacy";
 
 const PHOTOS_DIR = "photos";
 
@@ -6,7 +12,8 @@ const PHOTOS_DIR = "photos";
  * Каталог для хранения фотографий приложения (в documentDirectory).
  */
 export function getPhotosDirectory(): string {
-  const dir = `${FileSystem.documentDirectory}${PHOTOS_DIR}/`;
+  const base = documentDirectory ?? "";
+  const dir = `${base}${PHOTOS_DIR}/`;
   return dir;
 }
 
@@ -15,9 +22,9 @@ export function getPhotosDirectory(): string {
  */
 export async function ensurePhotosDirectory(): Promise<string> {
   const dir = getPhotosDirectory();
-  const info = await FileSystem.getInfoAsync(dir);
+  const info = await getInfoAsync(dir);
   if (!info.exists) {
-    await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+    await makeDirectoryAsync(dir, { intermediates: true });
   }
   return dir;
 }
@@ -29,7 +36,7 @@ export async function ensurePhotosDirectory(): Promise<string> {
 export async function copyToAppStorage(sourceUri: string, filename: string): Promise<string> {
   const dir = await ensurePhotosDirectory();
   const destUri = `${dir}${filename}`;
-  await FileSystem.copyAsync({ from: sourceUri, to: destUri });
+  await copyAsync({ from: sourceUri, to: destUri });
   return destUri;
 }
 
@@ -38,9 +45,9 @@ export async function copyToAppStorage(sourceUri: string, filename: string): Pro
  */
 export async function deletePhotoFile(uri: string): Promise<void> {
   try {
-    const info = await FileSystem.getInfoAsync(uri);
+    const info = await getInfoAsync(uri);
     if (info.exists) {
-      await FileSystem.deleteAsync(uri);
+      await deleteAsync(uri);
     }
   } catch {
     // игнорируем
