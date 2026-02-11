@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, TextInput, Button } from "react-native-paper";
 import { insertTrip } from "@/lib/db/trips";
 
@@ -9,7 +9,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export default function AddTripScreen() {
   const router = useRouter();
-  const db = useSQLiteContext();
+  const db = useDb();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState(today());

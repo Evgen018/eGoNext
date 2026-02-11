@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, Button, Text } from "react-native-paper";
 import { addPlacePhoto } from "@/lib/db/placePhotos";
 import { copyToAppStorage, generatePhotoFilename } from "@/lib/storage/photos";
@@ -10,7 +10,7 @@ import { pickImageFromCameraOrGallery } from "@/lib/imagePicker";
 export default function AddPlacePhotoScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const db = useSQLiteContext();
+  const db = useDb();
   const placeId = id ? parseInt(id, 10) : 0;
   const [saving, setSaving] = useState(false);
 

@@ -7,7 +7,7 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDb } from "@/lib/db/DbProvider";
 import {
   Appbar,
   Text,
@@ -33,7 +33,7 @@ type TripPlaceWithPlace = TripPlace & { placeName: string };
 export default function TripDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const db = useSQLiteContext();
+  const db = useDb();
   const tripId = id ? parseInt(id, 10) : 0;
 
   const [trip, setTrip] = useState<Trip | null>(null);

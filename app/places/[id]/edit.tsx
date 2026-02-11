@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, TextInput, Button, Switch, Text } from "react-native-paper";
 import { getPlaceById, updatePlace } from "@/lib/db/places";
 import { getCurrentCoords } from "@/lib/location";
@@ -14,7 +14,7 @@ import { useMapPicker } from "@/lib/MapPickerContext";
 export default function EditPlaceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const db = useSQLiteContext();
+  const db = useDb();
   const placeId = id ? parseInt(id, 10) : 0;
 
   const [name, setName] = useState("");

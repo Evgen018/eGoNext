@@ -1,14 +1,14 @@
 import { useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { View, StyleSheet, FlatList, Pressable } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, Text, Card, FAB } from "react-native-paper";
 import { getAllPlaces } from "@/lib/db/places";
 import type { Place } from "@/lib/db/types";
 
 export default function PlacesScreen() {
   const router = useRouter();
-  const db = useSQLiteContext();
+  const db = useDb();
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
 

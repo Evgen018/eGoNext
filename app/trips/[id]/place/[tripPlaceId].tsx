@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, Image, Alert } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDb } from "@/lib/db/DbProvider";
 import {
   Appbar,
   Text,
@@ -24,7 +24,7 @@ import { pickImageFromCameraOrGallery } from "@/lib/imagePicker";
 export default function TripPlaceEditScreen() {
   const { id, tripPlaceId } = useLocalSearchParams<{ id: string; tripPlaceId: string }>();
   const router = useRouter();
-  const db = useSQLiteContext();
+  const db = useDb();
   const tpId = tripPlaceId ? parseInt(tripPlaceId, 10) : 0;
 
   const [placeName, setPlaceName] = useState("");

@@ -1,0 +1,16 @@
+diff --git a/node_modules/react-native-paper/lib/module/components/Portal/PortalHost.js b/node_modules/react-native-paper/lib/module/components/Portal/PortalHost.js
+index 4dcd504..e6c3e29 100644
+--- a/node_modules/react-native-paper/lib/module/components/Portal/PortalHost.js
++++ b/node_modules/react-native-paper/lib/module/components/Portal/PortalHost.js
+@@ -101,9 +101,8 @@ export default class PortalHost extends React.Component {
+         unmount: this.unmount
+       }
+     }, /*#__PURE__*/React.createElement(View, {
+-      style: styles.container,
+-      collapsable: false,
+-      pointerEvents: "box-none"
++      style: [styles.container, { pointerEvents: 'box-none' }],
++      collapsable: false
+     }, this.props.children), /*#__PURE__*/React.createElement(PortalManager, {
+       ref: this.setManager
+     }));

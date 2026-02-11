@@ -12,7 +12,7 @@ export default function SettingsScreen() {
   const { isDark, setDark, theme } = useThemeContext();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="Настройки" />

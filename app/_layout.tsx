@@ -1,8 +1,8 @@
 import { Stack } from "expo-router";
 import { View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { SQLiteProvider } from "expo-sqlite";
 import { PaperProvider } from "react-native-paper";
+import { DbProvider } from "@/lib/db/DbProvider";
 import { initSchema } from "@/lib/db/init";
 import { ThemeProvider, useThemeContext } from "@/lib/theme-context";
 import { MapPickerProvider } from "@/lib/MapPickerContext";
@@ -35,12 +35,12 @@ function AppContent() {
 
 export default function RootLayout() {
   return (
-    <SQLiteProvider databaseName="egonext.db" onInit={initSchema}>
+    <DbProvider databaseName="egonext.db" onInit={initSchema}>
       <ThemeProvider>
         <MapPickerProvider>
           <AppContent />
         </MapPickerProvider>
       </ThemeProvider>
-    </SQLiteProvider>
+    </DbProvider>
   );
 }

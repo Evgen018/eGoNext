@@ -2,7 +2,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Linking } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, Text, Card, Button } from "react-native-paper";
 import { getCurrentTrip } from "@/lib/db/trips";
 import { getNextUnvisitedTripPlace } from "@/lib/db/tripPlaces";
@@ -21,7 +21,7 @@ function openNavigator(lat: number, lng: number) {
 
 export default function NextPlaceScreen() {
   const router = useRouter();
-  const db = useSQLiteContext();
+  const db = useDb();
   const [place, setPlace] = useState<Place | null>(null);
   const [tripTitle, setTripTitle] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, Image, Linking, Alert } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDb } from "@/lib/db/DbProvider";
 import {
   Appbar,
   Text,
@@ -26,7 +26,7 @@ function openMap(lat: number, lng: number) {
 export default function PlaceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const db = useSQLiteContext();
+  const db = useDb();
   const [place, setPlace] = useState<Place | null>(null);
   const [photos, setPhotos] = useState<PlacePhoto[]>([]);
   const [loading, setLoading] = useState(true);

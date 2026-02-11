@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, StyleSheet, FlatList, Pressable, Alert } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, Text, Card, FAB } from "react-native-paper";
 import { getAllPlaces } from "@/lib/db/places";
 import { getTripPlacesByTripId } from "@/lib/db/tripPlaces";
@@ -11,7 +11,7 @@ import type { Place } from "@/lib/db/types";
 export default function AddPlaceToTripScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const db = useSQLiteContext();
+  const db = useDb();
   const tripId = id ? parseInt(id, 10) : 0;
 
   const [places, setPlaces] = useState<Place[]>([]);

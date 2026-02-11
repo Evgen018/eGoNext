@@ -1,14 +1,14 @@
 import { useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { View, StyleSheet, FlatList, Pressable } from "react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, Text, Card, FAB } from "react-native-paper";
 import { getAllTrips } from "@/lib/db/trips";
 import type { Trip } from "@/lib/db/types";
 
 export default function TripsScreen() {
   const router = useRouter();
-  const db = useSQLiteContext();
+  const db = useDb();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
 
