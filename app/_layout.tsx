@@ -1,4 +1,6 @@
 import { Stack } from "expo-router";
+import { View } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { SQLiteProvider } from "expo-sqlite";
 import { PaperProvider } from "react-native-paper";
 import { initSchema } from "@/lib/db/init";
@@ -10,13 +12,21 @@ import { BackgroundLayout } from "@/lib/BackgroundLayout";
 const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = null;
 
 function AppContent() {
-  const { theme } = useThemeContext();
+  const { theme, isDark } = useThemeContext();
   return (
-    <BackgroundLayout source={GLOBAL_BACKGROUND}>
-      <PaperProvider theme={theme}>
-        <Stack screenOptions={{ headerShown: false }} />
-      </PaperProvider>
-    </BackgroundLayout>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <StatusBar style={isDark ? "light" : "dark"} />
+      <BackgroundLayout source={GLOBAL_BACKGROUND}>
+        <PaperProvider key={isDark ? "dark" : "light"} theme={theme}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: theme.colors.background },
+            }}
+          />
+        </PaperProvider>
+      </BackgroundLayout>
+    </View>
   );
 }
 

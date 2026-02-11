@@ -9,10 +9,10 @@ const version = Constants.expoConfig?.version ?? "1.0.0";
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { isDark, toggleTheme } = useThemeContext();
+  const { isDark, setDark, theme } = useThemeContext();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="Настройки" />
@@ -23,7 +23,7 @@ export default function SettingsScreen() {
           <List.Item
             title="Тёмная тема"
             right={() => (
-              <Switch value={isDark} onValueChange={toggleTheme} />
+              <Switch value={isDark} onValueChange={setDark} />
             )}
           />
         </List.Section>
