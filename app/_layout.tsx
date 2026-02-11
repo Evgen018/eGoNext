@@ -28,6 +28,6 @@ export default function RootLayout() {
           <AppContent />
         </MapPickerProvider>
       </ThemeProvider>
-    </SQLiteProvider>
+ц    </SQLiteProvider>
   );
 }

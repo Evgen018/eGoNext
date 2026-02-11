@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { View, StyleSheet, Platform, Alert } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import MapView, { MapPressEvent, Marker } from "react-native-maps";
 import { Appbar, Button, Text } from "react-native-paper";
 import { useMapPicker } from "@/lib/MapPickerContext";
@@ -48,24 +48,6 @@ export default function MapPickerScreen() {
     }
   }, [marker, setResult, router]);
 
-  if (Platform.OS === "web") {
-    return (
-      <View style={styles.container}>
-        <Appbar.Header>
-          <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title="Выбор на карте" />
-        </Appbar.Header>
-        <View style={styles.center}>
-          <Text variant="bodyLarge" style={styles.webMessage}>
-            Выбор точки на карте доступен в мобильном приложении (Android/iOS).
-            {"\n\n"}
-            Используйте «Текущая позиция» или введите координаты вручную.
-          </Text>
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <Appbar.Header>
@@ -110,8 +92,6 @@ export default function MapPickerScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1, width: "100%" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 24 },
-  webMessage: { textAlign: "center", opacity: 0.8 },
   footer: {
     padding: 16,
     backgroundColor: "white",
