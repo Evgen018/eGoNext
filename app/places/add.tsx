@@ -1,17 +1,21 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { Appbar, TextInput, Button, Switch, Text } from "react-native-paper";
 import { insertPlace } from "@/lib/db/places";
+import { insertTripPlace } from "@/lib/db/tripPlaces";
 import { getCurrentCoords } from "@/lib/location";
 import { addPlacePhoto } from "@/lib/db/placePhotos";
 import { copyToAppStorage, generatePhotoFilename } from "@/lib/storage/photos";
 import { pickImageFromCameraOrGallery } from "@/lib/imagePicker";
 
 export default function AddPlaceScreen() {
+  const { tripId } = useLocalSearchParams<{ tripId?: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
+  const isAddToTrip = !!tripId && !isNaN(parseInt(tripId, 10));
+  const parsedTripId = tripId ? parseInt(tripId, 10) : 0;
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [visitlater, setVisitlater] = useState(true);
@@ -68,7 +72,12 @@ export default function AddPlaceScreen() {
         );
         await addPlacePhoto(db, id, destUri, i);
       }
-      router.replace(`/places/${id}`);
+      if (isAddToTrip && parsedTripId > 0) {
+        await insertTripPlace(db, { tripId: parsedTripId, placeId: id });
+        router.replace(`/trips/${parsedTripId}`);
+      } else {
+        router.replace(`/places/${id}`);
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Не удалось сохранить место.";
       Alert.alert("Ошибка", msg);
@@ -81,7 +90,9 @@ export default function AddPlaceScreen() {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Добавить место" />
+        <Appbar.Content
+          title={isAddToTrip ? "Создать место и добавить в поездку" : "Добавить место"}
+        />
       </Appbar.Header>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>

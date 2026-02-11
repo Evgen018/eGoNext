@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, StyleSheet, FlatList, Pressable, Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
-import { Appbar, Text, Card } from "react-native-paper";
+import { Appbar, Text, Card, FAB } from "react-native-paper";
 import { getAllPlaces } from "@/lib/db/places";
 import { getTripPlacesByTripId } from "@/lib/db/tripPlaces";
 import { insertTripPlace } from "@/lib/db/tripPlaces";
@@ -34,6 +34,10 @@ export default function AddPlaceToTripScreen() {
     load();
   }, [tripId]);
 
+  const handleCreateNew = () => {
+    router.push(`/places/add?tripId=${tripId}`);
+  };
+
   const handleSelect = async (place: Place) => {
     if (alreadyIds.has(place.id)) return;
     try {
@@ -56,30 +60,44 @@ export default function AddPlaceToTripScreen() {
 
       {available.length === 0 ? (
         <View style={styles.center}>
-          <Text variant="bodyLarge">
+          <Text variant="bodyLarge" style={styles.emptyText}>
             {places.length === 0
-              ? "Нет мест. Создайте место в разделе «Места»."
-              : "Все места уже добавлены в поездку."}
+              ? "Нет мест. Создайте новое место «на лету» кнопкой ниже."
+              : "Все места уже добавлены. Создайте новое место «на лету»."}
           </Text>
+          <FAB
+            icon="plus"
+            label="Создать новое место"
+            onPress={handleCreateNew}
+            style={styles.fabInCenter}
+          />
         </View>
       ) : (
-        <FlatList
-          data={available}
-          keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <Pressable onPress={() => handleSelect(item)}>
-              <Card style={styles.card}>
-                <Card.Content>
-                  <Text variant="titleMedium">{item.name}</Text>
-                  <Text variant="bodySmall" numberOfLines={1}>
-                    {item.description || "—"}
-                  </Text>
-                </Card.Content>
-              </Card>
-            </Pressable>
-          )}
-        />
+        <>
+          <FlatList
+            data={available}
+            keyExtractor={(item) => String(item.id)}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <Pressable onPress={() => handleSelect(item)}>
+                <Card style={styles.card}>
+                  <Card.Content>
+                    <Text variant="titleMedium">{item.name}</Text>
+                    <Text variant="bodySmall" numberOfLines={1}>
+                      {item.description || "—"}
+                    </Text>
+                  </Card.Content>
+                </Card>
+              </Pressable>
+            )}
+          />
+          <FAB
+            icon="plus"
+            label="Создать новое место"
+            onPress={handleCreateNew}
+            style={styles.fab}
+          />
+        </>
       )}
     </View>
   );
@@ -88,6 +106,9 @@ export default function AddPlaceToTripScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 24 },
-  list: { padding: 16 },
+  emptyText: { textAlign: "center", marginBottom: 16 },
+  list: { padding: 16, paddingBottom: 88 },
   card: { marginBottom: 8 },
+  fab: { position: "absolute", right: 16, bottom: 16 },
+  fabInCenter: { marginTop: 8 },
 });
