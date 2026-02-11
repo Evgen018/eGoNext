@@ -3,6 +3,7 @@ import { SQLiteProvider } from "expo-sqlite";
 import { PaperProvider } from "react-native-paper";
 import { initSchema } from "@/lib/db/init";
 import { ThemeProvider, useThemeContext } from "@/lib/theme-context";
+import { MapPickerProvider } from "@/lib/MapPickerContext";
 import { BackgroundLayout } from "@/lib/BackgroundLayout";
 
 /** Фон для ВСЕХ экранов. Укажите require('@/egonext-bg.png') или null, чтобы отключить. */
@@ -23,7 +24,9 @@ export default function RootLayout() {
   return (
     <SQLiteProvider databaseName="egonext.db" onInit={initSchema}>
       <ThemeProvider>
-        <AppContent />
+        <MapPickerProvider>
+          <AppContent />
+        </MapPickerProvider>
       </ThemeProvider>
     </SQLiteProvider>
   );

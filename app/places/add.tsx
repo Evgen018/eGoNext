@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { Appbar, TextInput, Button, Switch, Text } from "react-native-paper";
@@ -9,6 +9,7 @@ import { getCurrentCoords } from "@/lib/location";
 import { addPlacePhoto } from "@/lib/db/placePhotos";
 import { copyToAppStorage, generatePhotoFilename } from "@/lib/storage/photos";
 import { pickImageFromCameraOrGallery } from "@/lib/imagePicker";
+import { useMapPicker } from "@/lib/MapPickerContext";
 
 export default function AddPlaceScreen() {
   const { tripId } = useLocalSearchParams<{ tripId?: string }>();
@@ -25,6 +26,21 @@ export default function AddPlaceScreen() {
   const [saving, setSaving] = useState(false);
   const [photoUris, setPhotoUris] = useState<string[]>([]);
   const [loadingLoc, setLoadingLoc] = useState(false);
+  const { consumeResult } = useMapPicker();
+
+  useFocusEffect(
+    useCallback(() => {
+      const result = consumeResult();
+      if (result) {
+        setLatitude(result.latitude.toFixed(6));
+        setLongitude(result.longitude.toFixed(6));
+      }
+    }, [consumeResult])
+  );
+
+  const handlePickOnMap = () => {
+    router.push("/places/map-picker");
+  };
 
   const handleGetLocation = async () => {
     setLoadingLoc(true);
@@ -128,6 +144,14 @@ export default function AddPlaceScreen() {
           style={styles.input}
         >
           Текущая позиция
+        </Button>
+        <Button
+          mode="outlined"
+          icon="map-marker-outline"
+          onPress={handlePickOnMap}
+          style={styles.input}
+        >
+          Выбрать на карте
         </Button>
         <TextInput
           label="Широта"
