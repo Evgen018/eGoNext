@@ -19,7 +19,7 @@ import {
 } from "@/lib/db/tripPlaces";
 import { copyToAppStorage, generatePhotoFilename } from "@/lib/storage/photos";
 import { deletePhotoFile } from "@/lib/storage/photos";
-import * as ImagePicker from "expo-image-picker";
+import { pickImageFromCameraOrGallery } from "@/lib/imagePicker";
 
 export default function TripPlaceEditScreen() {
   const { id, tripPlaceId } = useLocalSearchParams<{ id: string; tripPlaceId: string }>();
@@ -77,20 +77,11 @@ export default function TripPlaceEditScreen() {
   };
 
   const handlePickPhoto = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Доступ запрещён", "Разрешите доступ к галерее в настройках приложения.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      quality: 0.8,
-    });
-    if (result.canceled || !result.assets[0]) return;
+    const uri = await pickImageFromCameraOrGallery();
+    if (!uri) return;
     try {
       const destUri = await copyToAppStorage(
-        result.assets[0].uri,
+        uri,
         generatePhotoFilename(`trip_${tpId}`)
       );
       await addTripPlacePhoto(db, tpId, destUri);

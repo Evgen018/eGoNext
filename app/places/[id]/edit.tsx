@@ -8,7 +8,7 @@ import { getCurrentCoords } from "@/lib/location";
 import { getPhotosByPlaceId } from "@/lib/db/placePhotos";
 import { addPlacePhoto } from "@/lib/db/placePhotos";
 import { copyToAppStorage, generatePhotoFilename } from "@/lib/storage/photos";
-import * as ImagePicker from "expo-image-picker";
+import { pickImageFromCameraOrGallery } from "@/lib/imagePicker";
 
 export default function EditPlaceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -66,18 +66,9 @@ export default function EditPlaceScreen() {
   }, [placeId]);
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Доступ запрещён", "Разрешите доступ к галерее в настройках приложения.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setNewPhotoUris((prev) => [...prev, result.assets[0].uri]);
+    const uri = await pickImageFromCameraOrGallery();
+    if (uri) {
+      setNewPhotoUris((prev) => [...prev, uri]);
     }
   };
 

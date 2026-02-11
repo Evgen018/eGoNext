@@ -5,7 +5,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { Appbar, Button, Text } from "react-native-paper";
 import { addPlacePhoto } from "@/lib/db/placePhotos";
 import { copyToAppStorage, generatePhotoFilename } from "@/lib/storage/photos";
-import * as ImagePicker from "expo-image-picker";
+import { pickImageFromCameraOrGallery } from "@/lib/imagePicker";
 
 export default function AddPlacePhotoScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -16,21 +16,12 @@ export default function AddPlacePhotoScreen() {
 
   const pickAndSave = async () => {
     if (!placeId || isNaN(placeId)) return;
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Доступ запрещён", "Разрешите доступ к галерее в настройках приложения.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      quality: 0.8,
-    });
-    if (result.canceled || !result.assets[0]) return;
+    const uri = await pickImageFromCameraOrGallery();
+    if (!uri) return;
     setSaving(true);
     try {
       const destUri = await copyToAppStorage(
-        result.assets[0].uri,
+        uri,
         generatePhotoFilename(`place_${placeId}`)
       );
       await addPlacePhoto(db, placeId, destUri);
@@ -50,7 +41,7 @@ export default function AddPlacePhotoScreen() {
       </Appbar.Header>
       <View style={styles.content}>
         <Button mode="contained" onPress={pickAndSave} loading={saving}>
-          Выбрать фото из галереи
+          Добавить фото (камера / галерея)
         </Button>
       </View>
     </View>

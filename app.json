@@ -16,7 +16,14 @@
     },
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Приложение использует галерею для прикрепления фотографий к местам и поездкам.",
+          "cameraPermission": "Приложение использует камеру для съёмки фотографий мест и поездок."
+        }
+      ]
     ]
   }
 }
