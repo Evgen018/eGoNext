@@ -9,7 +9,8 @@ import { MapPickerProvider } from "@/lib/MapPickerContext";
 import { BackgroundLayout } from "@/lib/BackgroundLayout";
 
 /** Фон для ВСЕХ экранов. Укажите require('@/egonext-bg.png') или null, чтобы отключить. */
-const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = null;
+
+const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = require("@/assets/images/egonext-bg.png");
 
 function AppContent() {
   const { theme, isDark } = useThemeContext();
@@ -21,7 +22,9 @@ function AppContent() {
           <Stack
             screenOptions={{
               headerShown: false,
-              contentStyle: { backgroundColor: theme.colors.background },
+              contentStyle: GLOBAL_BACKGROUND
+                ? { backgroundColor: "transparent" }
+                : { backgroundColor: theme.colors.background },
             }}
           />
         </PaperProvider>

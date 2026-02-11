@@ -1,89 +1,84 @@
-# Фоновое изображение (ImageBackground)
+# Как изменить фоновое изображение
 
-Как добавить фоновое изображение `.png` на все экраны или на выбранные, используя компонент `ImageBackground` из React Native.
-
----
-
-## Схема (как на структуре проекта)
-
-```
-app/
-  _layout.tsx          ← общий layout для ВСЕГО приложения
-  index.tsx            ← главный экран
-  profile.tsx          ← другой экран
-  settings/            ← секция настроек
-    _layout.tsx        ← layout только для экранов внутри settings/
-    index.tsx          ← экран /settings
-```
-
-- **app/_layout.tsx** — фон для всех экранов
-- **app/settings/_layout.tsx** — фон только для экранов в секции settings
-- **Отдельный экран** — `ImageBackground` в самом файле экрана
+Пошаговая инструкция: где и что именно писать, чтобы включить или отключить фон. Указаны **полные строки** без сокращений.
 
 ---
 
-## 1. Фон на ВСЕ экраны
+## Фон на ВСЕ экраны приложения
 
-Файл: **`app/_layout.tsx`**
+**Файл:** `app/_layout.tsx`.  
+Меняется **одна строка** — та, где объявлена переменная `GLOBAL_BACKGROUND` (сразу под комментарием «Фон для ВСЕХ экранов»). Должна быть **только одна** такая строка без `//` в начале.
+
+### Вариант 1: без фона
+
+Вся строка целиком должна быть **ровно такая** (в конце — `null` и точка с запятой):
 
 ```tsx
-import { BackgroundLayout } from "@/lib/BackgroundLayout";
-
-// Вариант А: включить фон (положите .png в корень или assets/images/)
-const GLOBAL_BACKGROUND = require("@/egonext-bg.png");
-
-// Вариант Б: отключить фон
-// const GLOBAL_BACKGROUND = null;
-
-function AppContent() {
-  return (
-    <BackgroundLayout source={GLOBAL_BACKGROUND}>
-      <PaperProvider theme={theme}>
-        <Stack screenOptions={{ headerShown: false }} />
-      </PaperProvider>
-    </BackgroundLayout>
-  );
-}
+const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = null;
 ```
 
-Положите файл `egonext-bg.png` в корень проекта или `assets/images/background.png` и используйте:
+Никакого `require`, только `null`. Тогда фоновой картинки не будет.
+
+---
+
+### Вариант 2: с фоновой картинкой
+
+Вся строка целиком должна быть **ровно такая** (обратите внимание: у `require` **две скобки** — открывающая `(` после слова `require` и **обязательно закрывающая `)`** перед точкой с запятой):
 
 ```tsx
-const GLOBAL_BACKGROUND = require("@/assets/images/background.png");
+const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = require("@/assets/images/egonext-bg.png");
+```
+
+- Вместо `@/assets/images/egonext-bg.png` подставьте свой путь к файлу (см. таблицу ниже).
+- Написание: `require("путь");` — скобка после `require`, путь в кавычках, **закрывающая скобка `)` перед `;`**. Без этой скобки будет ошибка.
+
+Если картинка лежит в **корне проекта** (например `egonext-bg.png`), строка будет такая:
+
+```tsx
+const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = require("@/egonext-bg.png");
 ```
 
 ---
 
-## 2. Фон только для группы экранов (например, настройки)
+**Итог по `app/_layout.tsx`:** активна одна строка с `GLOBAL_BACKGROUND`: либо `= null;` (без фона), либо `= require("...");` (с фоном). В `require` обязательно писать путь в кавычках и не забывать закрывающую `)`.
 
-Добавьте папку с `_layout.tsx` для нужной секции.
+---
 
-Пример: **`app/settings/_layout.tsx`**
+## Фон только в разделе «Настройки»
+
+**Файл:** `app/settings/_layout.tsx`.  
+Меняется строка с переменной `SETTINGS_BACKGROUND` (под комментарием «Фон только для экранов внутри /settings»).
+
+### Без фона — строка целиком:
 
 ```tsx
-import { Stack } from "expo-router";
-import { BackgroundLayout } from "@/lib/BackgroundLayout";
+const SETTINGS_BACKGROUND = null;
+```
 
+### С фоном — строка целиком (у `require` обе скобки: `(` и `)`):
+
+```tsx
 const SETTINGS_BACKGROUND = require("@/assets/images/settings-bg.png");
-
-export default function SettingsLayout() {
-  return (
-    <BackgroundLayout source={SETTINGS_BACKGROUND}>
-      <Stack screenOptions={{ headerShown: false }} />
-    </BackgroundLayout>
-  );
-}
 ```
 
-Тогда фон будет только у экранов внутри `settings/` (например `/settings`, `/settings/privacy` и т.п.).
-
-Для других групп — `places/`, `trips/` — аналогично создайте `_layout.tsx` с `BackgroundLayout`.
+Путь внутри кавычек можно заменить на свой; закрывающая `)` перед `;` обязательна.
 
 ---
 
-## 3. Фон на ОДИН конкретный экран
+## Куда класть файлы картинок
 
-Файл самого экрана, например **`app/profile.tsx`**:
+| Куда положили файл | Что писать в require |
+|-------------------|----------------------|
+| Корень проекта, например `egonext-bg.png` | `require("@/egonext-bg.png")` |
+| Папка `assets/images/`, например `background.png` | `require("@/assets/images/background.png")` |
+
+Подходят форматы: `.png`, `.jpg`, `.jpeg`.
+
+---
+
+## Фон на один конкретный экран
+
+Если нужен фон только на одном экране (не на всех и не в целой группе), используйте `ImageBackground` прямо в файле этого экрана:
 
 ```tsx
 import { ImageBackground, View, StyleSheet } from "react-native";
@@ -94,7 +89,7 @@ export default function ProfileScreen() {
   return (
     <ImageBackground source={bgImage} style={styles.background} resizeMode="cover">
       <View style={styles.content}>
-        {/* Ваш контент */}
+        {/* контент экрана */}
       </View>
     </ImageBackground>
   );
@@ -108,32 +103,11 @@ const styles = StyleSheet.create({
 
 ---
 
-## 4. Куда класть изображения
+## Краткая шпаргалка
 
-| Путь                          | Пример require                          |
-|-------------------------------|-----------------------------------------|
-| Корень: `egonext-bg.png`      | `require("@/egonext-bg.png")`           |
-| Папка assets: `assets/images/` | `require("@/assets/images/background.png")` |
+| Где фон | Файл | Без фона (полная строка) | С фоном (полная строка) |
+|--------|------|---------------------------|--------------------------|
+| Все экраны | `app/_layout.tsx` | `const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType \| null = null;` | `const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType \| null = require("@/assets/images/egonext-bg.png");` |
+| Только Настройки | `app/settings/_layout.tsx` | `const SETTINGS_BACKGROUND = null;` | `const SETTINGS_BACKGROUND = require("@/assets/images/settings-bg.png");` |
 
-Формат: `.png`, `.jpg`, `.jpeg`.
-
----
-
-## 5. Отключить фон
-
-Просто замените значение на `null`:
-
-```tsx
-const GLOBAL_BACKGROUND = null;
-```
-
----
-
-## 6. Компонент BackgroundLayout
-
-Файл **`lib/BackgroundLayout.tsx`**:
-
-- Если `source` задан — оборачивает детей в `ImageBackground`
-- Если `source === null` или не передан — рендерит только `children`
-
-Можно использовать в любом месте, не только в layouts.
+Важно: в `require("путь")` обязательно **две скобки** — открывающая и закрывающая: `require("...")` — иначе будет ошибка. Компонент `lib/BackgroundLayout.tsx` менять не нужно.
