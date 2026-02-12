@@ -1,0 +1,13 @@
+diff --git a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt
+index adc53e4..ae01974 100644
+--- a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt
++++ b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt
+@@ -53,6 +53,8 @@ internal class CropImageContract(
+             CropShape.RECTANGLE -> CropImageView.CropShape.RECTANGLE
+             CropShape.OVAL -> CropImageView.CropShape.OVAL
+           }
++
++          cropMenuCropButtonTitle = "Сохранить"
+         }
+       )
+     )

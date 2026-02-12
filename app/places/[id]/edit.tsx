@@ -1,15 +1,15 @@
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import { View, StyleSheet, ScrollView, Alert, Image } from "react-native";
 import { useDb } from "@/lib/db/DbProvider";
-import { Appbar, TextInput, Button, Switch, Text } from "react-native-paper";
+import { Appbar, TextInput, Button, Switch, Text, IconButton } from "react-native-paper";
 import { getPlaceById, updatePlace } from "@/lib/db/places";
 import { getCurrentCoords } from "@/lib/location";
-import { getPhotosByPlaceId } from "@/lib/db/placePhotos";
-import { addPlacePhoto } from "@/lib/db/placePhotos";
-import { copyToAppStorage, generatePhotoFilename } from "@/lib/storage/photos";
+import { getPhotosByPlaceId, addPlacePhoto, deletePlacePhoto } from "@/lib/db/placePhotos";
+import { copyToAppStorage, generatePhotoFilename, deletePhotoFile } from "@/lib/storage/photos";
 import { pickImageFromCameraOrGallery } from "@/lib/imagePicker";
 import { useMapPicker } from "@/lib/MapPickerContext";
+import type { PlacePhoto } from "@/lib/db/types";
 
 export default function EditPlaceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -25,6 +25,7 @@ export default function EditPlaceScreen() {
   const [longitude, setLongitude] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [existingPhotos, setExistingPhotos] = useState<PlacePhoto[]>([]);
   const [newPhotoUris, setNewPhotoUris] = useState<string[]>([]);
   const [loadingLoc, setLoadingLoc] = useState(false);
   const { consumeResult } = useMapPicker();
@@ -63,8 +64,8 @@ export default function EditPlaceScreen() {
 
   useEffect(() => {
     if (!placeId || isNaN(placeId)) return;
-    getPlaceById(db, placeId)
-      .then((p) => {
+    Promise.all([getPlaceById(db, placeId), getPhotosByPlaceId(db, placeId)])
+      .then(([p, photos]) => {
         if (p) {
           setName(p.name);
           setDescription(p.description);
@@ -73,6 +74,7 @@ export default function EditPlaceScreen() {
           setLatitude(p.latitude != null ? String(p.latitude) : "");
           setLongitude(p.longitude != null ? String(p.longitude) : "");
         }
+        setExistingPhotos(photos);
         setLoading(false);
       })
       .catch((err) => {
@@ -86,6 +88,20 @@ export default function EditPlaceScreen() {
     if (uri) {
       setNewPhotoUris((prev) => [...prev, uri]);
     }
+  };
+
+  const handleDeleteExistingPhoto = async (photoId: number, uri: string) => {
+    try {
+      await deletePlacePhoto(db, photoId);
+      await deletePhotoFile(uri);
+      setExistingPhotos((prev) => prev.filter((p) => p.id !== photoId));
+    } catch (err) {
+      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось удалить фото.");
+    }
+  };
+
+  const handleRemoveNewPhoto = (index: number) => {
+    setNewPhotoUris((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSave = async () => {
@@ -201,6 +217,39 @@ export default function EditPlaceScreen() {
           keyboardType="decimal-pad"
           style={styles.input}
         />
+        <Text variant="titleMedium" style={styles.photoSectionTitle}>
+          Фотографии
+        </Text>
+        {existingPhotos.length > 0 && (
+          <View style={styles.photoGrid}>
+            {existingPhotos.map((p) => (
+              <View key={p.id} style={styles.photoItem}>
+                <Image source={{ uri: p.uri }} style={styles.photo} />
+                <IconButton
+                  icon="delete"
+                  size={20}
+                  onPress={() => handleDeleteExistingPhoto(p.id, p.uri)}
+                  style={styles.photoDelete}
+                />
+              </View>
+            ))}
+          </View>
+        )}
+        {newPhotoUris.length > 0 && (
+          <View style={styles.photoGrid}>
+            {newPhotoUris.map((uri, index) => (
+              <View key={`new-${index}`} style={styles.photoItem}>
+                <Image source={{ uri }} style={styles.photo} />
+                <IconButton
+                  icon="close"
+                  size={20}
+                  onPress={() => handleRemoveNewPhoto(index)}
+                  style={styles.photoDelete}
+                />
+              </View>
+            ))}
+          </View>
+        )}
         <Button mode="outlined" onPress={pickImage} style={styles.input}>
           Добавить фото ({newPhotoUris.length})
         </Button>
@@ -229,4 +278,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 8,
   },
+  photoSectionTitle: { marginTop: 8, marginBottom: 4 },
+  photoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 8 },
+  photoItem: { position: "relative" },
+  photo: { width: 100, height: 100, borderRadius: 8 },
+  photoDelete: { position: "absolute", top: -8, right: -8, margin: 0 },
 });
