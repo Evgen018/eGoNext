@@ -22,17 +22,23 @@ export default function MapPickerScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCurrentCoords().then((coords) => {
-      if (coords) {
-        setRegion({
-          ...DEFAULT_REGION,
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        });
-        setMarker(coords);
-      }
-      setLoading(false);
-    });
+    const timeoutMs = 8000;
+    const timeoutPromise = new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), timeoutMs)
+    );
+    Promise.race([getCurrentCoords(), timeoutPromise])
+      .then((coords) => {
+        if (coords) {
+          setRegion({
+            ...DEFAULT_REGION,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          });
+          setMarker(coords);
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleMapPress = useCallback((e: MapPressEvent) => {
@@ -62,6 +68,7 @@ export default function MapPickerScreen() {
         onPress={handleMapPress}
         showsUserLocation
         loadingEnabled={loading}
+        mapType="none"
       >
         {marker && (
           <Marker
