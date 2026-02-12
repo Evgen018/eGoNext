@@ -165,7 +165,10 @@ export default function TripDetailScreen() {
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={trip.title} />
-        <Appbar.Action icon="star" onPress={handleSetCurrent} />
+        <Appbar.Action
+          icon={trip.current === 1 ? "star" : "star-outline"}
+          onPress={handleSetCurrent}
+        />
         <Appbar.Action icon="delete" onPress={handleDelete} />
       </Appbar.Header>
 
