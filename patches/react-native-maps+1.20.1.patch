@@ -1,0 +1,12 @@
+diff --git a/node_modules/react-native-maps/lib/MapView.js b/node_modules/react-native-maps/lib/MapView.js
+index 8783539..535349c 100644
+--- a/node_modules/react-native-maps/lib/MapView.js
++++ b/node_modules/react-native-maps/lib/MapView.js
+@@ -341,6 +341,7 @@ class MapView extends React.Component {
+                 customMapStyleString: this.props.customMapStyle
+                     ? JSON.stringify(this.props.customMapStyle)
+                     : undefined,
++                mapType: this.props.mapType,
+             };
+         }
+         const AIRMap = getNativeMapComponent(this.props.provider);
