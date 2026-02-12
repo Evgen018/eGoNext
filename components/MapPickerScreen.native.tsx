@@ -6,11 +6,12 @@ import { Appbar, Button, Text } from "react-native-paper";
 import { useMapPicker } from "@/lib/MapPickerContext";
 import { getCurrentCoords } from "@/lib/location";
 
+// Черногория — центр карты по умолчанию
 const DEFAULT_REGION = {
-  latitude: 55.7558,
-  longitude: 37.6173,
-  latitudeDelta: 0.05,
-  longitudeDelta: 0.05,
+  latitude: 42.7087,
+  longitude: 19.3744,
+  latitudeDelta: 1.2,
+  longitudeDelta: 1.2,
 };
 
 export default function MapPickerScreen() {
