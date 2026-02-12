@@ -8,17 +8,16 @@ import { ThemeProvider, useThemeContext } from "@/lib/theme-context";
 import { MapPickerProvider } from "@/lib/MapPickerContext";
 import { BackgroundLayout } from "@/lib/BackgroundLayout";
 
-/** Фон для ВСЕХ экранов. Укажите require('@/egonext-bg.png') или null, чтобы отключить. */
-
-const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = require("@/assets/images/egonext-bg.png");
+/** Фон для ВСЕХ экранов. Путь относительно app/: ../assets/images/имя.png или null. */
+const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = require("../assets/images/egonext-bg.png");
 
 function AppContent() {
-  const { theme, isDark } = useThemeContext();
+  const { theme } = useThemeContext();
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <StatusBar style={isDark ? "light" : "dark"} />
+      <StatusBar style="dark" />
       <BackgroundLayout source={GLOBAL_BACKGROUND}>
-        <PaperProvider key={isDark ? "dark" : "light"} theme={theme}>
+        <PaperProvider theme={theme}>
           <Stack
             screenOptions={{
               headerShown: false,

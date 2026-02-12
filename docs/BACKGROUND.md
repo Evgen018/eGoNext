@@ -1,13 +1,13 @@
 # Как изменить фоновое изображение
 
-Пошаговая инструкция: где и что именно писать, чтобы включить или отключить фон. Указаны **полные строки** без сокращений.
+Пошаговая инструкция: где и что именно писать, чтобы включить или отключить фон. Используются **относительные пути** (без алиаса `@/`), чтобы Metro стабильно находил картинки.
 
 ---
 
 ## Фон на ВСЕ экраны приложения
 
 **Файл:** `app/_layout.tsx`.  
-Меняется **одна строка** — та, где объявлена переменная `GLOBAL_BACKGROUND` (сразу под комментарием «Фон для ВСЕХ экранов»). Должна быть **только одна** такая строка без `//` в начале.
+Меняется **одна строка** — та, где объявлена переменная `GLOBAL_BACKGROUND` (сразу под комментарием про фон). Должна быть **только одна** такая строка без `//` в начале.
 
 ### Вариант 1: без фона
 
@@ -23,31 +23,27 @@ const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = nul
 
 ### Вариант 2: с фоновой картинкой
 
-Вся строка целиком должна быть **ровно такая** (обратите внимание: у `require` **две скобки** — открывающая `(` после слова `require` и **обязательно закрывающая `)`** перед точкой с запятой):
+Вся строка целиком должна быть **ровно такая** (у `require` **две скобки** — `(` и `)` перед `;`):
 
 ```tsx
-const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = require("@/assets/images/egonext-bg.png");
+const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = require("../assets/images/egonext-bg.png");
 ```
 
-- Вместо `@/assets/images/egonext-bg.png` подставьте свой путь к файлу (см. таблицу ниже).
-- Написание: `require("путь");` — скобка после `require`, путь в кавычках, **закрывающая скобка `)` перед `;`**. Без этой скобки будет ошибка.
+- Путь **относительно папки `app/`**: картинки из `assets/images/` задаются как `../assets/images/имя-файла.png`.
+- Если картинка в **корне проекта** (рядом с `app/`): `../egonext-bg.png`.
 
-Если картинка лежит в **корне проекта** (например `egonext-bg.png`), строка будет такая:
-
-```tsx
-const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType | null = require("@/egonext-bg.png");
-```
+Написание: `require("путь");` — путь в кавычках, **закрывающая скобка `)` перед `;`**. Без неё будет ошибка.
 
 ---
 
-**Итог по `app/_layout.tsx`:** активна одна строка с `GLOBAL_BACKGROUND`: либо `= null;` (без фона), либо `= require("...");` (с фоном). В `require` обязательно писать путь в кавычках и не забывать закрывающую `)`.
+**Итог по `app/_layout.tsx`:** активна одна строка с `GLOBAL_BACKGROUND`: либо `= null;` (без фона), либо `= require("...");` (с фоном). Путь в `require` — относительный от `app/`.
 
 ---
 
 ## Фон только в разделе «Настройки»
 
 **Файл:** `app/settings/_layout.tsx`.  
-Меняется строка с переменной `SETTINGS_BACKGROUND` (под комментарием «Фон только для экранов внутри /settings»).
+Меняется строка с переменной `SETTINGS_BACKGROUND` (под комментарием про фон настроек).
 
 ### Без фона — строка целиком:
 
@@ -58,32 +54,33 @@ const SETTINGS_BACKGROUND = null;
 ### С фоном — строка целиком (у `require` обе скобки: `(` и `)`):
 
 ```tsx
-const SETTINGS_BACKGROUND = require("@/assets/images/settings-bg.png");
+const SETTINGS_BACKGROUND = require("../../assets/images/settings-bg.png");
 ```
 
-Путь внутри кавычек можно заменить на свой; закрывающая `)` перед `;` обязательна.
+Путь **относительно папки `app/settings/`**: картинки из `assets/images/` задаются как `../../assets/images/имя-файла.png`. Закрывающая `)` перед `;` обязательна.
 
 ---
 
-## Куда класть файлы картинок
+## Куда класть файлы картинок и какие пути писать
 
-| Куда положили файл | Что писать в require |
-|-------------------|----------------------|
-| Корень проекта, например `egonext-bg.png` | `require("@/egonext-bg.png")` |
-| Папка `assets/images/`, например `background.png` | `require("@/assets/images/background.png")` |
+| Куда положили файл | В `app/_layout.tsx` | В `app/settings/_layout.tsx` |
+|-------------------|---------------------|------------------------------|
+| `assets/images/egonext-bg.png` | `require("../assets/images/egonext-bg.png")` | — |
+| `assets/images/settings-bg.png` | — | `require("../../assets/images/settings-bg.png")` |
+| Корень проекта `egonext-bg.png` | `require("../egonext-bg.png")` | — |
 
-Подходят форматы: `.png`, `.jpg`, `.jpeg`.
+Подходят форматы: `.png`, `.jpg`, `.jpeg`. Файл должен быть обычным PNG/JPG (не HEIF с переименованным расширением), иначе Metro может выдать ошибку.
 
 ---
 
 ## Фон на один конкретный экран
 
-Если нужен фон только на одном экране (не на всех и не в целой группе), используйте `ImageBackground` прямо в файле этого экрана:
+Если нужен фон только на одном экране (не на всех и не в целой группе), используйте `ImageBackground` прямо в файле этого экрана. Путь в `require` — **относительно этого файла**. Например, для экрана в `app/places/profile.tsx` картинка из `assets/images/` задаётся так:
 
 ```tsx
 import { ImageBackground, View, StyleSheet } from "react-native";
 
-const bgImage = require("@/assets/images/profile-bg.png");
+const bgImage = require("../../assets/images/profile-bg.png");
 
 export default function ProfileScreen() {
   return (
@@ -105,9 +102,9 @@ const styles = StyleSheet.create({
 
 ## Краткая шпаргалка
 
-| Где фон | Файл | Без фона (полная строка) | С фоном (полная строка) |
-|--------|------|---------------------------|--------------------------|
-| Все экраны | `app/_layout.tsx` | `const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType \| null = null;` | `const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType \| null = require("@/assets/images/egonext-bg.png");` |
-| Только Настройки | `app/settings/_layout.tsx` | `const SETTINGS_BACKGROUND = null;` | `const SETTINGS_BACKGROUND = require("@/assets/images/settings-bg.png");` |
+| Где фон | Файл | Без фона | С фоном (относительный путь) |
+|--------|------|----------|------------------------------|
+| Все экраны | `app/_layout.tsx` | `= null;` | `= require("../assets/images/egonext-bg.png");` |
+| Только Настройки | `app/settings/_layout.tsx` | `= null;` | `= require("../../assets/images/settings-bg.png");` |
 
-Важно: в `require("путь")` обязательно **две скобки** — открывающая и закрывающая: `require("...")` — иначе будет ошибка. Компонент `lib/BackgroundLayout.tsx` менять не нужно.
+Важно: в `require("путь")` обязательно **две скобки** — `require("...")`. Компонент `lib/BackgroundLayout.tsx` менять не нужно.
