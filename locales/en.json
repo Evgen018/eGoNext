@@ -14,6 +14,7 @@
     "places": "Places",
     "trips": "Trips",
     "nextPlace": "Next place",
+    "stats": "My statistics",
     "settings": "Settings"
   },
   "places": {
@@ -147,5 +148,16 @@
     "importError": "Could not restore data.",
     "importInvalidFile": "Invalid backup file.",
     "share": "Share / Save"
+  },
+  "stats": {
+    "title": "My statistics",
+    "periodAll": "All time",
+    "trips": "Trips",
+    "places": "Places",
+    "photos": "Photos",
+    "tripsLastYear": "Last 12 months: {{count}} trips",
+    "topVisited": "Top visited places",
+    "topVisitedEmpty": "No visited places yet. Mark places as visited in your trips.",
+    "visitsCount": "{{count}} visits"
   }
 }

@@ -37,6 +37,13 @@ export default function HomeScreen() {
         </Button>
         <Button
           mode="contained"
+          onPress={() => router.push("/stats")}
+          style={styles.button}
+        >
+          {t("home.stats")}
+        </Button>
+        <Button
+          mode="contained"
           onPress={() => router.push("/settings")}
           style={styles.button}
         >
