@@ -1,13 +1,15 @@
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { Appbar, List, Divider, Text } from "react-native-paper";
+import { Appbar, List, Text, Switch } from "react-native-paper";
+import { useThemeContext } from "@/lib/theme-context";
 
 const appName = Constants.expoConfig?.name ?? "GoNext";
 const version = Constants.expoConfig?.version ?? "1.0.0";
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { isDark, setColorScheme } = useThemeContext();
 
   return (
     <View style={styles.container}>
@@ -16,6 +18,21 @@ export default function SettingsScreen() {
         <Appbar.Content title="Настройки" />
       </Appbar.Header>
       <ScrollView style={styles.scroll}>
+        <List.Section>
+          <List.Subheader>Внешний вид</List.Subheader>
+          <List.Item
+            title="Тёмная тема"
+            description={isDark ? "Включена" : "Выключена"}
+            left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
+            right={() => (
+              <Switch
+                value={isDark}
+                onValueChange={() => setColorScheme(isDark ? "light" : "dark")}
+              />
+            )}
+            onPress={() => setColorScheme(isDark ? "light" : "dark")}
+          />
+        </List.Section>
         <List.Section>
           <List.Subheader>О приложении</List.Subheader>
           <List.Item
