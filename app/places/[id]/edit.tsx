@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, Alert, Image } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, TextInput, Button, Switch, Text, IconButton } from "react-native-paper";
 import { getPlaceById, updatePlace } from "@/lib/db/places";
@@ -14,6 +15,7 @@ import type { PlacePhoto } from "@/lib/db/types";
 export default function EditPlaceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const db = useDb();
   const placeId = id ? parseInt(id, 10) : 0;
 
@@ -52,10 +54,7 @@ export default function EditPlaceScreen() {
         setLatitude(coords.latitude.toFixed(6));
         setLongitude(coords.longitude.toFixed(6));
       } else {
-        Alert.alert(
-          "Доступ запрещён",
-          "Разрешите доступ к геолокации в настройках приложения."
-        );
+        Alert.alert(t("location.accessDenied"), t("location.locationDenied"));
       }
     } finally {
       setLoadingLoc(false);
@@ -78,7 +77,7 @@ export default function EditPlaceScreen() {
         setLoading(false);
       })
       .catch((err) => {
-        Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось загрузить место.");
+        Alert.alert(t("common.error"), err instanceof Error ? err.message : t("places.loadPlaceError"));
         setLoading(false);
       });
   }, [placeId]);
@@ -96,7 +95,7 @@ export default function EditPlaceScreen() {
       await deletePhotoFile(uri);
       setExistingPhotos((prev) => prev.filter((p) => p.id !== photoId));
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось удалить фото.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("places.deletePhotoError"));
     }
   };
 
@@ -132,7 +131,7 @@ export default function EditPlaceScreen() {
       }
       router.replace(`/places/${placeId}`);
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось сохранить изменения.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("places.saveChangesError"));
     } finally {
       setSaving(false);
     }
@@ -143,7 +142,7 @@ export default function EditPlaceScreen() {
       <View style={styles.container}>
         <Appbar.Header>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title="Редактирование" />
+          <Appbar.Content title={t("places.editing")} />
         </Appbar.Header>
         <View style={styles.center}>
           <Text>Загрузка...</Text>
@@ -156,19 +155,19 @@ export default function EditPlaceScreen() {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Редактировать место" />
+        <Appbar.Content title={t("places.editPlace")} />
       </Appbar.Header>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <TextInput
-          label="Название *"
+          label={t("places.nameLabel")}
           value={name}
           onChangeText={setName}
           mode="outlined"
           style={styles.input}
         />
         <TextInput
-          label="Описание"
+          label={t("places.descriptionLabel")}
           value={description}
           onChangeText={setDescription}
           mode="outlined"
@@ -177,11 +176,11 @@ export default function EditPlaceScreen() {
           style={styles.input}
         />
         <View style={styles.row}>
-          <Text>Посетить позже</Text>
+          <Text>{t("places.visitLater")}</Text>
           <Switch value={visitlater} onValueChange={setVisitlater} />
         </View>
         <View style={styles.row}>
-          <Text>Понравилось</Text>
+          <Text>{t("places.liked")}</Text>
           <Switch value={liked} onValueChange={setLiked} />
         </View>
         <Button
@@ -191,7 +190,7 @@ export default function EditPlaceScreen() {
           loading={loadingLoc}
           style={styles.input}
         >
-          Текущая позиция
+          {t("places.currentPosition")}
         </Button>
         <Button
           mode="outlined"
@@ -199,10 +198,10 @@ export default function EditPlaceScreen() {
           onPress={handlePickOnMap}
           style={styles.input}
         >
-          Выбрать на карте
+          {t("places.selectOnMap")}
         </Button>
         <TextInput
-          label="Широта"
+          label={t("places.latitude")}
           value={latitude}
           onChangeText={setLatitude}
           mode="outlined"
@@ -210,7 +209,7 @@ export default function EditPlaceScreen() {
           style={styles.input}
         />
         <TextInput
-          label="Долгота"
+          label={t("places.longitude")}
           value={longitude}
           onChangeText={setLongitude}
           mode="outlined"
@@ -218,7 +217,7 @@ export default function EditPlaceScreen() {
           style={styles.input}
         />
         <Text variant="titleMedium" style={styles.photoSectionTitle}>
-          Фотографии
+          {t("places.photos")}
         </Text>
         {existingPhotos.length > 0 && (
           <View style={styles.photoGrid}>
@@ -251,7 +250,7 @@ export default function EditPlaceScreen() {
           </View>
         )}
         <Button mode="outlined" onPress={pickImage} style={styles.input}>
-          Добавить фото ({newPhotoUris.length})
+          {t("places.attachPhoto")} ({newPhotoUris.length})
         </Button>
         <Button
           mode="contained"
@@ -259,7 +258,7 @@ export default function EditPlaceScreen() {
           loading={saving}
           disabled={!name.trim()}
         >
-          Сохранить
+          {t("common.save")}
         </Button>
       </ScrollView>
     </View>

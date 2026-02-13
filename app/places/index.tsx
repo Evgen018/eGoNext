@@ -1,6 +1,7 @@
 import { useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { View, StyleSheet, FlatList, Pressable } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, Text, Card, FAB } from "react-native-paper";
 import { getAllPlaces } from "@/lib/db/places";
@@ -8,6 +9,7 @@ import type { Place } from "@/lib/db/types";
 
 export default function PlacesScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const db = useDb();
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,17 +35,17 @@ export default function PlacesScreen() {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Места" />
+        <Appbar.Content title={t("places.title")} />
       </Appbar.Header>
 
       {loading ? (
         <View style={styles.center}>
-          <Text>Загрузка...</Text>
+          <Text>{t("common.loading")}</Text>
         </View>
       ) : places.length === 0 ? (
         <View style={styles.center}>
           <Text variant="bodyLarge" style={styles.emptyText}>
-            Нет мест. Нажмите + чтобы добавить.
+            {t("places.emptyList")}
           </Text>
         </View>
       ) : (
@@ -57,7 +59,7 @@ export default function PlacesScreen() {
                 <Card.Content>
                   <Text variant="titleMedium">{item.name}</Text>
                   <Text variant="bodySmall" numberOfLines={2}>
-                    {item.description || "Без описания"}
+                    {item.description || t("places.noDescription")}
                   </Text>
                   {item.latitude != null && item.longitude != null && (
                     <Text variant="labelSmall" style={styles.coords}>
@@ -71,7 +73,7 @@ export default function PlacesScreen() {
         />
       )}
 
-      <FAB icon="plus" style={styles.fab} onPress={handleAdd} label="Добавить" />
+      <FAB icon="plus" style={styles.fab} onPress={handleAdd} label={t("places.add")} />
     </View>
   );
 }

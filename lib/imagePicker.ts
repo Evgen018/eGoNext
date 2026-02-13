@@ -1,5 +1,6 @@
 import { Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import i18n from "@/lib/i18n";
 
 const PICKER_OPTIONS: ImagePicker.ImagePickerOptions = {
   mediaTypes: "images",
@@ -10,7 +11,10 @@ const PICKER_OPTIONS: ImagePicker.ImagePickerOptions = {
 async function pickFromCamera(): Promise<string | null> {
   const { status } = await ImagePicker.requestCameraPermissionsAsync();
   if (status !== "granted") {
-    Alert.alert("Доступ запрещён", "Разрешите доступ к камере в настройках приложения.");
+    Alert.alert(
+      i18n.t("photo.accessDenied"),
+      i18n.t("photo.cameraDenied")
+    );
     return null;
   }
   const result = await ImagePicker.launchCameraAsync(PICKER_OPTIONS);
@@ -20,7 +24,10 @@ async function pickFromCamera(): Promise<string | null> {
 async function pickFromGallery(): Promise<string | null> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (status !== "granted") {
-    Alert.alert("Доступ запрещён", "Разрешите доступ к галерее в настройках приложения.");
+    Alert.alert(
+      i18n.t("photo.accessDenied"),
+      i18n.t("photo.galleryDenied")
+    );
     return null;
   }
   const result = await ImagePicker.launchImageLibraryAsync(PICKER_OPTIONS);
@@ -32,22 +39,26 @@ async function pickFromGallery(): Promise<string | null> {
  */
 export async function pickImageFromCameraOrGallery(): Promise<string | null> {
   return new Promise((resolve) => {
-    Alert.alert("Добавить фото", "Выберите источник", [
-      {
-        text: "Камера",
-        onPress: async () => {
-          const uri = await pickFromCamera();
-          resolve(uri);
+    Alert.alert(
+      i18n.t("photo.addPhoto"),
+      i18n.t("photo.chooseSource"),
+      [
+        {
+          text: i18n.t("photo.camera"),
+          onPress: async () => {
+            const uri = await pickFromCamera();
+            resolve(uri);
+          },
         },
-      },
-      {
-        text: "Галерея",
-        onPress: async () => {
-          const uri = await pickFromGallery();
-          resolve(uri);
+        {
+          text: i18n.t("photo.gallery"),
+          onPress: async () => {
+            const uri = await pickFromGallery();
+            resolve(uri);
+          },
         },
-      },
-      { text: "Отмена", style: "cancel", onPress: () => resolve(null) },
-    ]);
+        { text: i18n.t("common.cancel"), style: "cancel", onPress: () => resolve(null) },
+      ]
+    );
   });
 }

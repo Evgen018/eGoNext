@@ -1,14 +1,16 @@
 import { useRouter } from "expo-router";
 import { View, StyleSheet } from "react-native";
 import { Appbar, Button } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
       <Appbar.Header>
-        <Appbar.Content title="eGoNext" />
+        <Appbar.Content title={t("home.title")} />
       </Appbar.Header>
 
       <View style={styles.content}>
@@ -17,28 +19,28 @@ export default function HomeScreen() {
           onPress={() => router.push("/places")}
           style={styles.button}
         >
-          Места
+          {t("home.places")}
         </Button>
         <Button
           mode="contained"
           onPress={() => router.push("/trips")}
           style={styles.button}
         >
-          Поездки
+          {t("home.trips")}
         </Button>
         <Button
           mode="contained"
           onPress={() => router.push("/next-place")}
           style={styles.button}
         >
-          Следующее место
+          {t("home.nextPlace")}
         </Button>
         <Button
           mode="contained"
           onPress={() => router.push("/settings")}
           style={styles.button}
         >
-          Настройки
+          {t("home.settings")}
         </Button>
       </View>
     </View>

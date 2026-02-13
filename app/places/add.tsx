@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, TextInput, Button, Switch, Text } from "react-native-paper";
 import { insertPlace } from "@/lib/db/places";
@@ -14,6 +15,7 @@ import { useMapPicker } from "@/lib/MapPickerContext";
 export default function AddPlaceScreen() {
   const { tripId } = useLocalSearchParams<{ tripId?: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const db = useDb();
   const isAddToTrip = !!tripId && !isNaN(parseInt(tripId, 10));
   const parsedTripId = tripId ? parseInt(tripId, 10) : 0;
@@ -50,10 +52,7 @@ export default function AddPlaceScreen() {
         setLatitude(coords.latitude.toFixed(6));
         setLongitude(coords.longitude.toFixed(6));
       } else {
-        Alert.alert(
-          "Доступ запрещён",
-          "Разрешите доступ к геолокации в настройках приложения."
-        );
+        Alert.alert(t("location.accessDenied"), t("location.locationDenied"));
       }
     } finally {
       setLoadingLoc(false);
@@ -95,8 +94,8 @@ export default function AddPlaceScreen() {
         router.replace(`/places/${id}`);
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Не удалось сохранить место.";
-      Alert.alert("Ошибка", msg);
+      const msg = err instanceof Error ? err.message : t("places.savePlaceError");
+      Alert.alert(t("common.error"), msg);
     } finally {
       setSaving(false);
     }
@@ -107,20 +106,20 @@ export default function AddPlaceScreen() {
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content
-          title={isAddToTrip ? "Создать место и добавить в поездку" : "Добавить место"}
+          title={isAddToTrip ? t("places.createAndAddToTrip") : t("places.addPlace")}
         />
       </Appbar.Header>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <TextInput
-          label="Название *"
+          label={t("places.nameLabel")}
           value={name}
           onChangeText={setName}
           mode="outlined"
           style={styles.input}
         />
         <TextInput
-          label="Описание"
+          label={t("places.descriptionLabel")}
           value={description}
           onChangeText={setDescription}
           mode="outlined"
@@ -129,11 +128,11 @@ export default function AddPlaceScreen() {
           style={styles.input}
         />
         <View style={styles.row}>
-          <Text>Посетить позже</Text>
+          <Text>{t("places.visitLater")}</Text>
           <Switch value={visitlater} onValueChange={setVisitlater} />
         </View>
         <View style={styles.row}>
-          <Text>Понравилось</Text>
+          <Text>{t("places.liked")}</Text>
           <Switch value={liked} onValueChange={setLiked} />
         </View>
         <Button
@@ -143,7 +142,7 @@ export default function AddPlaceScreen() {
           loading={loadingLoc}
           style={styles.input}
         >
-          Текущая позиция
+          {t("places.currentPosition")}
         </Button>
         <Button
           mode="outlined"
@@ -151,10 +150,10 @@ export default function AddPlaceScreen() {
           onPress={handlePickOnMap}
           style={styles.input}
         >
-          Выбрать на карте
+          {t("places.selectOnMap")}
         </Button>
         <TextInput
-          label="Широта"
+          label={t("places.latitude")}
           value={latitude}
           onChangeText={setLatitude}
           mode="outlined"
@@ -163,7 +162,7 @@ export default function AddPlaceScreen() {
           placeholder="55.7558"
         />
         <TextInput
-          label="Долгота"
+          label={t("places.longitude")}
           value={longitude}
           onChangeText={setLongitude}
           mode="outlined"
@@ -172,7 +171,7 @@ export default function AddPlaceScreen() {
           placeholder="37.6173"
         />
         <Button mode="outlined" onPress={pickImage} style={styles.input}>
-          Прикрепить фото ({photoUris.length})
+          {t("places.attachPhoto")} ({photoUris.length})
         </Button>
         <Button
           mode="contained"
@@ -180,7 +179,7 @@ export default function AddPlaceScreen() {
           loading={saving}
           disabled={!name.trim()}
         >
-          Сохранить
+          {t("common.save")}
         </Button>
       </ScrollView>
     </View>

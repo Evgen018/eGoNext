@@ -7,6 +7,7 @@ import {
   Pressable,
   Alert,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import {
   Appbar,
@@ -33,6 +34,7 @@ type TripPlaceWithPlace = TripPlace & { placeName: string };
 export default function TripDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const db = useDb();
   const tripId = id ? parseInt(id, 10) : 0;
 
@@ -54,7 +56,7 @@ export default function TripDetailScreen() {
       );
       setTripPlaces(withNames);
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось загрузить поездку.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.loadTripError"));
     } finally {
       setLoading(false);
     }
@@ -69,15 +71,15 @@ export default function TripDetailScreen() {
       await setCurrentTrip(db, tripId);
       loadData();
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось установить текущую поездку.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.setCurrentError"));
     }
   };
 
   const handleDelete = () => {
-    Alert.alert("Удалить поездку?", "Все данные о маршруте будут удалены.", [
-      { text: "Отмена", style: "cancel" },
+    Alert.alert(t("trips.deleteTripConfirm"), t("trips.deleteTripMessage"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Удалить",
+        text: t("common.delete"),
         style: "destructive",
         onPress: async () => {
           try {
@@ -89,7 +91,7 @@ export default function TripDetailScreen() {
             await deleteTrip(db, tripId);
             router.replace("/trips");
           } catch (err) {
-            Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось удалить поездку.");
+            Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.deleteTripError"));
           }
         },
       },
@@ -103,7 +105,7 @@ export default function TripDetailScreen() {
       await swapTripPlaceOrder(db, tp.id, "up");
       loadData();
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось изменить порядок.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.reorderError"));
     }
   };
 
@@ -112,7 +114,7 @@ export default function TripDetailScreen() {
       await swapTripPlaceOrder(db, tp.id, "down");
       loadData();
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось изменить порядок.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.reorderError"));
     }
   };
 
@@ -121,22 +123,22 @@ export default function TripDetailScreen() {
       await markTripPlaceVisited(db, tp.id);
       loadData();
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось отметить посещение.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.markVisitedError"));
     }
   };
 
   const handleRemovePlace = (tp: TripPlaceWithPlace) => {
-    Alert.alert("Убрать место?", `Удалить "${tp.placeName}" из маршрута?`, [
-      { text: "Отмена", style: "cancel" },
+    Alert.alert(t("trips.removePlaceConfirm"), t("trips.removePlaceMessage", { name: tp.placeName }), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Убрать",
+        text: t("trips.remove"),
         style: "destructive",
         onPress: async () => {
           try {
             await deleteTripPlace(db, tp.id);
             loadData();
           } catch (err) {
-            Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось убрать место.");
+            Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.removePlaceError"));
           }
         },
       },
@@ -151,10 +153,10 @@ export default function TripDetailScreen() {
       <View style={styles.container}>
         <Appbar.Header>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title="Поездка" />
+          <Appbar.Content title={t("trips.trip")} />
         </Appbar.Header>
         <View style={styles.center}>
-          <Text>{loading ? "Загрузка..." : "Поездка не найдена"}</Text>
+          <Text>{loading ? t("common.loading") : t("trips.tripNotFound")}</Text>
         </View>
       </View>
     );
@@ -180,7 +182,7 @@ export default function TripDetailScreen() {
               {trip.startDate} — {trip.endDate}
             </Text>
             {trip.current === 1 && (
-              <Chip style={styles.chip}>Текущая поездка</Chip>
+              <Chip style={styles.chip}>{t("trips.currentTrip")}</Chip>
             )}
             {trip.description ? (
               <Text variant="bodyMedium" style={styles.desc}>
@@ -192,15 +194,15 @@ export default function TripDetailScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionRow}>
-            <Text variant="titleMedium">Маршрут</Text>
+            <Text variant="titleMedium">{t("trips.route")}</Text>
             <Button mode="outlined" compact onPress={handleAddPlace}>
-              Добавить место
+              {t("trips.addPlace")}
             </Button>
           </View>
 
           {tripPlaces.length === 0 ? (
             <Text variant="bodySmall" style={styles.muted}>
-              Нет мест в маршруте
+              {t("trips.noPlacesInRoute")}
             </Text>
           ) : (
             tripPlaces.map((tp, idx) => (
@@ -214,7 +216,7 @@ export default function TripDetailScreen() {
                       <Text variant="titleSmall">{tp.placeName}</Text>
                       {tp.visited ? (
                         <Text variant="labelSmall" style={styles.visited}>
-                          Посещено: {tp.visitDate ?? "—"}
+                          {t("trips.visited")}: {tp.visitDate ?? "—"}
                         </Text>
                       ) : null}
                       {tp.notes ? (

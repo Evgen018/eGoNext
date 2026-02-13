@@ -2,6 +2,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Linking } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, Text, Card, Button } from "react-native-paper";
 import { getCurrentTrip } from "@/lib/db/trips";
@@ -21,6 +22,7 @@ function openNavigator(lat: number, lng: number) {
 
 export default function NextPlaceScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const db = useDb();
   const [place, setPlace] = useState<Place | null>(null);
   const [tripTitle, setTripTitle] = useState<string | null>(null);
@@ -35,19 +37,19 @@ export default function NextPlaceScreen() {
     try {
       const currentTrip = await getCurrentTrip(db);
       if (!currentTrip) {
-        setEmptyReason("Нет активной поездки. Отметьте поездку как текущую в разделе «Поездки».");
+        setEmptyReason(t("nextPlace.noActiveTrip"));
         return;
       }
       setTripTitle(currentTrip.title);
       const nextTp = await getNextUnvisitedTripPlace(db, currentTrip.id);
       if (!nextTp) {
-        setEmptyReason("Все места посещены. Маршрут завершён!");
+        setEmptyReason(t("nextPlace.allVisited"));
         return;
       }
       const p = await getPlaceById(db, nextTp.placeId);
       setPlace(p ?? null);
       if (!p) {
-        setEmptyReason("Место не найдено.");
+        setEmptyReason(t("nextPlace.placeNotFound"));
       }
     } finally {
       setLoading(false);
@@ -57,7 +59,7 @@ export default function NextPlaceScreen() {
   useFocusEffect(
     useCallback(() => {
       loadNextPlace();
-    }, [])
+    }, [t])
   );
 
   const hasCoords = place?.latitude != null && place?.longitude != null;
@@ -66,17 +68,17 @@ export default function NextPlaceScreen() {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Следующее место" />
+        <Appbar.Content title={t("nextPlace.title")} />
       </Appbar.Header>
 
       <View style={styles.content}>
         {loading ? (
-          <Text>Загрузка...</Text>
+          <Text>{t("common.loading")}</Text>
         ) : emptyReason ? (
           <Card style={styles.card}>
             <Card.Content>
               <Text variant="titleMedium" style={styles.emptyTitle}>
-                Нет следующего места
+                {t("nextPlace.noNextPlace")}
               </Text>
               <Text variant="bodyMedium" style={styles.emptyText}>
                 {emptyReason}
@@ -106,19 +108,19 @@ export default function NextPlaceScreen() {
                     mode="contained-tonal"
                     onPress={() => openOnMap(place.latitude!, place.longitude!)}
                   >
-                    Открыть на карте
+                    {t("nextPlace.openOnMap")}
                   </Button>
                   <Button
                     mode="contained"
                     onPress={() => openNavigator(place.latitude!, place.longitude!)}
                   >
-                    Маршрут
+                    {t("nextPlace.route")}
                   </Button>
                 </View>
               )}
               {!hasCoords && (
                 <Text variant="bodySmall" style={styles.muted}>
-                  Координаты не заданы. Добавьте их в карточке места для навигации.
+                  {t("nextPlace.noCoords")}
                 </Text>
               )}
             </Card.Content>

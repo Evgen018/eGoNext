@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, StyleSheet, FlatList, Pressable, Alert } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, Text, Card, FAB } from "react-native-paper";
 import { getAllPlaces } from "@/lib/db/places";
@@ -11,6 +12,7 @@ import type { Place } from "@/lib/db/types";
 export default function AddPlaceToTripScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const db = useDb();
   const tripId = id ? parseInt(id, 10) : 0;
 
@@ -28,7 +30,7 @@ export default function AddPlaceToTripScreen() {
         setPlaces(allPlaces);
         setAlreadyIds(new Set(tps.map((t) => t.placeId)));
       } catch (err) {
-        Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось загрузить данные.");
+        Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.loadDataError"));
       }
     };
     load();
@@ -45,7 +47,7 @@ export default function AddPlaceToTripScreen() {
       setAlreadyIds((prev) => new Set([...prev, place.id]));
       router.back();
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось добавить место.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.addPlaceError"));
     }
   };
 
@@ -55,19 +57,19 @@ export default function AddPlaceToTripScreen() {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Добавить место" />
+        <Appbar.Content title={t("trips.addPlaceToTrip")} />
       </Appbar.Header>
 
       {available.length === 0 ? (
         <View style={styles.center}>
           <Text variant="bodyLarge" style={styles.emptyText}>
             {places.length === 0
-              ? "Нет мест. Создайте новое место «на лету» кнопкой ниже."
-              : "Все места уже добавлены. Создайте новое место «на лету»."}
+              ? t("trips.noPlacesCreateNew")
+              : t("trips.allPlacesAdded")}
           </Text>
           <FAB
             icon="plus"
-            label="Создать новое место"
+            label={t("trips.createNewPlace")}
             onPress={handleCreateNew}
             style={styles.fabInCenter}
           />
@@ -84,7 +86,7 @@ export default function AddPlaceToTripScreen() {
                   <Card.Content>
                     <Text variant="titleMedium">{item.name}</Text>
                     <Text variant="bodySmall" numberOfLines={1}>
-                      {item.description || "—"}
+                      {item.description || t("places.noDescription")}
                     </Text>
                   </Card.Content>
                 </Card>
@@ -93,7 +95,7 @@ export default function AddPlaceToTripScreen() {
           />
           <FAB
             icon="plus"
-            label="Создать новое место"
+            label={t("trips.createNewPlace")}
             onPress={handleCreateNew}
             style={styles.fab}
           />

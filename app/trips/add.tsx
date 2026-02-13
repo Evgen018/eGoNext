@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, TextInput, Button } from "react-native-paper";
 import { insertTrip } from "@/lib/db/trips";
@@ -9,6 +10,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export default function AddTripScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const db = useDb();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -29,7 +31,7 @@ export default function AddTripScreen() {
       });
       router.replace(`/trips/${id}`);
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось создать поездку.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.createTripError"));
     } finally {
       setSaving(false);
     }
@@ -39,19 +41,19 @@ export default function AddTripScreen() {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Создать поездку" />
+        <Appbar.Content title={t("trips.createTrip")} />
       </Appbar.Header>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <TextInput
-          label="Название *"
+          label={t("trips.nameLabel")}
           value={title}
           onChangeText={setTitle}
           mode="outlined"
           style={styles.input}
         />
         <TextInput
-          label="Описание"
+          label={t("trips.descriptionLabel")}
           value={description}
           onChangeText={setDescription}
           mode="outlined"
@@ -60,7 +62,7 @@ export default function AddTripScreen() {
           style={styles.input}
         />
         <TextInput
-          label="Дата начала"
+          label={t("trips.startDate")}
           value={startDate}
           onChangeText={setStartDate}
           mode="outlined"
@@ -68,7 +70,7 @@ export default function AddTripScreen() {
           placeholder="YYYY-MM-DD"
         />
         <TextInput
-          label="Дата окончания"
+          label={t("trips.endDate")}
           value={endDate}
           onChangeText={setEndDate}
           mode="outlined"
@@ -81,7 +83,7 @@ export default function AddTripScreen() {
           loading={saving}
           disabled={!title.trim()}
         >
-          Создать поездку
+          {t("trips.createTrip")}
         </Button>
       </ScrollView>
     </View>

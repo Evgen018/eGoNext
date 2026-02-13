@@ -1,6 +1,7 @@
 import { useRouter, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { View, StyleSheet, FlatList, Pressable } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import { Appbar, Text, Card, FAB } from "react-native-paper";
 import { getAllTrips } from "@/lib/db/trips";
@@ -8,6 +9,7 @@ import type { Trip } from "@/lib/db/types";
 
 export default function TripsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const db = useDb();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,17 +35,17 @@ export default function TripsScreen() {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Поездки" />
+        <Appbar.Content title={t("trips.title")} />
       </Appbar.Header>
 
       {loading ? (
         <View style={styles.center}>
-          <Text>Загрузка...</Text>
+          <Text>{t("common.loading")}</Text>
         </View>
       ) : trips.length === 0 ? (
         <View style={styles.center}>
           <Text variant="bodyLarge" style={styles.emptyText}>
-            Нет поездок. Нажмите + чтобы создать.
+            {t("trips.emptyList")}
           </Text>
         </View>
       ) : (
@@ -59,7 +61,7 @@ export default function TripsScreen() {
                     <Text variant="titleMedium">{item.title}</Text>
                     {item.current === 1 && (
                       <Text variant="labelSmall" style={styles.currentBadge}>
-                        Текущая
+                        {t("trips.currentShort")}
                       </Text>
                     )}
                   </View>
@@ -78,7 +80,7 @@ export default function TripsScreen() {
         />
       )}
 
-      <FAB icon="plus" style={styles.fab} onPress={handleAdd} label="Создать" />
+      <FAB icon="plus" style={styles.fab} onPress={handleAdd} label={t("trips.create")} />
     </View>
   );
 }

@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, Image, Linking, Alert } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import {
   Appbar,
@@ -26,6 +27,7 @@ function openMap(lat: number, lng: number) {
 export default function PlaceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const db = useDb();
   const [place, setPlace] = useState<Place | null>(null);
   const [photos, setPhotos] = useState<PlacePhoto[]>([]);
@@ -43,7 +45,7 @@ export default function PlaceDetailScreen() {
       setPlace(p ?? null);
       setPhotos(ph);
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось загрузить место.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("places.loadPlaceError"));
     } finally {
       setLoading(false);
     }
@@ -65,17 +67,17 @@ export default function PlaceDetailScreen() {
       await deletePhotoFile(uri);
       loadData();
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось удалить фото.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("places.deletePhotoError"));
     }
   };
 
   const handleEdit = () => router.push(`/places/${placeId}/edit`);
 
   const handleDelete = () => {
-    Alert.alert("Удалить место?", "Место и все его фото будут удалены.", [
-      { text: "Отмена", style: "cancel" },
+    Alert.alert(t("places.deletePlaceConfirm"), t("places.deletePlaceMessage"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Удалить",
+        text: t("common.delete"),
         style: "destructive",
         onPress: async () => {
           try {
@@ -83,7 +85,7 @@ export default function PlaceDetailScreen() {
             for (const p of photos) await deletePhotoFile(p.uri);
             router.replace("/places");
           } catch (err) {
-            Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось удалить место.");
+            Alert.alert(t("common.error"), err instanceof Error ? err.message : t("places.deletePlaceError"));
           }
         },
       },
@@ -97,10 +99,10 @@ export default function PlaceDetailScreen() {
       <View style={styles.container}>
         <Appbar.Header>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title="Место" />
+          <Appbar.Content title={t("places.place")} />
         </Appbar.Header>
         <View style={styles.center}>
-          <Text>{loading ? "Загрузка..." : "Место не найдено"}</Text>
+          <Text>{loading ? t("common.loading") : t("places.placeNotFound")}</Text>
         </View>
       </View>
     );
@@ -126,11 +128,11 @@ export default function PlaceDetailScreen() {
             </Text>
             <View style={styles.row}>
               <Text variant="labelMedium">Посетить позже:</Text>
-              <Text>{place.visitlater ? "Да" : "Нет"}</Text>
+              <Text>{place.visitlater ? t("common.yes") : t("common.no")}</Text>
             </View>
             <View style={styles.row}>
               <Text variant="labelMedium">Понравилось:</Text>
-              <Text>{place.liked ? "Да" : "Нет"}</Text>
+              <Text>{place.liked ? t("common.yes") : t("common.no")}</Text>
             </View>
             {hasCoords && (
               <View style={styles.row}>
@@ -151,12 +153,12 @@ export default function PlaceDetailScreen() {
 
         <Divider style={styles.divider} />
         <View style={styles.photoHeader}>
-          <Text variant="titleMedium">Фотографии</Text>
+          <Text variant="titleMedium">{t("places.photos")}</Text>
           <IconButton icon="plus" size={24} onPress={handleAddPhoto} />
         </View>
         {photos.length === 0 ? (
           <Text variant="bodySmall" style={styles.muted}>
-            Нет фотографий
+            {t("places.noPhotos")}
           </Text>
         ) : (
           <View style={styles.photoGrid}>

@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, Image, Alert } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import {
   Appbar,
@@ -24,6 +25,7 @@ import { pickImageFromCameraOrGallery } from "@/lib/imagePicker";
 export default function TripPlaceEditScreen() {
   const { id, tripPlaceId } = useLocalSearchParams<{ id: string; tripPlaceId: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const db = useDb();
   const tpId = tripPlaceId ? parseInt(tripPlaceId, 10) : 0;
 
@@ -46,7 +48,7 @@ export default function TripPlaceEditScreen() {
       const phs = await getPhotosByTripPlaceId(db, tpId);
       setPhotos(phs.map((ph) => ({ id: ph.id, uri: ph.uri })));
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось загрузить данные.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.loadDataError"));
     } finally {
       setLoading(false);
     }
@@ -61,7 +63,7 @@ export default function TripPlaceEditScreen() {
     try {
       await updateTripPlaceNotes(db, tpId, notes.trim() || null);
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось сохранить заметки.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.saveNotesError"));
     } finally {
       setSaving(false);
     }
@@ -72,7 +74,7 @@ export default function TripPlaceEditScreen() {
       await markTripPlaceVisited(db, tpId);
       setVisited(true);
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось отметить посещение.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.markVisitedErrorPlace"));
     }
   };
 
@@ -87,7 +89,7 @@ export default function TripPlaceEditScreen() {
       await addTripPlacePhoto(db, tpId, destUri);
       loadData();
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось добавить фото.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.addPhotoError"));
     }
   };
 
@@ -97,7 +99,7 @@ export default function TripPlaceEditScreen() {
       await deletePhotoFile(uri);
       loadData();
     } catch (err) {
-      Alert.alert("Ошибка", err instanceof Error ? err.message : "Не удалось удалить фото.");
+      Alert.alert(t("common.error"), err instanceof Error ? err.message : t("trips.deletePhotoError"));
     }
   };
 
@@ -106,10 +108,10 @@ export default function TripPlaceEditScreen() {
       <View style={styles.container}>
         <Appbar.Header>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title="Место в поездке" />
+          <Appbar.Content title={t("trips.placeInTrip")} />
         </Appbar.Header>
         <View style={styles.center}>
-          <Text>Загрузка...</Text>
+          <Text>{t("common.loading")}</Text>
         </View>
       </View>
     );
@@ -125,12 +127,12 @@ export default function TripPlaceEditScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         {!visited && (
           <Button mode="contained-tonal" onPress={handleMarkVisited}>
-            Отметить посещённым
+            {t("trips.markVisited")}
           </Button>
         )}
 
         <Text variant="labelMedium" style={styles.label}>
-          Заметки
+          {t("trips.notes")}
         </Text>
         <TextInput
           value={notes}
@@ -141,14 +143,14 @@ export default function TripPlaceEditScreen() {
           style={styles.input}
         />
         <Button mode="outlined" onPress={handleSaveNotes} loading={saving}>
-          Сохранить заметки
+          {t("trips.saveNotes")}
         </Button>
 
         <Text variant="labelMedium" style={styles.label}>
-          Фотографии
+          {t("places.photos")}
         </Text>
         <Button mode="outlined" onPress={handlePickPhoto}>
-          Добавить фото
+          {t("places.addPhoto")}
         </Button>
         {photos.length > 0 && (
           <View style={styles.photoGrid}>

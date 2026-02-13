@@ -1,9 +1,11 @@
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { View, StyleSheet, ScrollView, Pressable } from "react-native";
-import { Appbar, List, Text, Switch } from "react-native-paper";
+import { Appbar, List, Text, Switch, Button } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 import { useThemeContext, PRIMARY_COLOR_OPTIONS } from "@/lib/theme-context";
 import { MD3DarkTheme } from "react-native-paper";
+import { changeAppLanguage, type SupportedLanguage } from "@/lib/i18n";
 
 const appName = Constants.expoConfig?.name ?? "GoNext";
 const version = Constants.expoConfig?.version ?? "1.0.0";
@@ -12,20 +14,26 @@ const DEFAULT_DARK_PRIMARY = MD3DarkTheme.colors.primary;
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
   const { isDark, setColorScheme, primaryColor, setPrimaryColor } = useThemeContext();
+  const currentLang = (i18n.language === "en" ? "en" : "ru") as SupportedLanguage;
+
+  const handleLanguage = (lang: SupportedLanguage) => {
+    changeAppLanguage(lang);
+  };
 
   return (
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Настройки" />
+        <Appbar.Content title={t("settings.title")} />
       </Appbar.Header>
       <ScrollView style={styles.scroll}>
         <List.Section>
-          <List.Subheader>Внешний вид</List.Subheader>
+          <List.Subheader>{t("settings.appearance")}</List.Subheader>
           <List.Item
-            title="Тёмная тема"
-            description={isDark ? "Включена" : "Выключена"}
+            title={t("settings.darkTheme")}
+            description={isDark ? t("settings.darkThemeOn") : t("settings.darkThemeOff")}
             left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
             right={() => (
               <Switch
@@ -38,7 +46,7 @@ export default function SettingsScreen() {
           {isDark && (
             <>
               <List.Subheader style={styles.colorSubheader}>
-                Основной цвет (тёмная тема)
+                {t("settings.primaryColor")}
               </List.Subheader>
               <View style={styles.colorRow}>
                 <Pressable
@@ -63,21 +71,41 @@ export default function SettingsScreen() {
               </View>
             </>
           )}
+          <List.Subheader style={styles.colorSubheader}>
+            {t("settings.language")}
+          </List.Subheader>
+          <View style={styles.languageRow}>
+            <Button
+              mode={currentLang === "ru" ? "contained" : "outlined"}
+              compact
+              onPress={() => handleLanguage("ru")}
+              style={styles.langButton}
+            >
+              RU
+            </Button>
+            <Button
+              mode={currentLang === "en" ? "contained" : "outlined"}
+              compact
+              onPress={() => handleLanguage("en")}
+              style={styles.langButton}
+            >
+              EN
+            </Button>
+          </View>
         </List.Section>
         <List.Section>
-          <List.Subheader>О приложении</List.Subheader>
+          <List.Subheader>{t("settings.about")}</List.Subheader>
           <List.Item
             title={appName}
-            description="Дневник туриста"
+            description={t("settings.appDescription")}
           />
           <List.Item
-            title="Версия"
+            title={t("settings.version")}
             description={version}
           />
           <View style={styles.aboutText}>
             <Text variant="bodyMedium" style={styles.aboutBody}>
-              Планирование поездок и ведение дневника. Работает полностью офлайн.
-              Данные хранятся локально на устройстве.
+              {t("settings.aboutText")}
             </Text>
           </View>
         </List.Section>
@@ -110,5 +138,15 @@ const styles = StyleSheet.create({
   colorCircleSelected: {
     borderColor: "#fff",
     borderWidth: 3,
+  },
+  languageRow: {
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: "center",
+  },
+  langButton: {
+    minWidth: 64,
   },
 });
