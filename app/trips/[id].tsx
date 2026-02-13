@@ -6,7 +6,11 @@ import {
   ScrollView,
   Pressable,
   Alert,
+  Share,
 } from "react-native";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
+import { readAsStringAsync, EncodingType } from "expo-file-system/legacy";
 import { useTranslation } from "react-i18next";
 import { useDb } from "@/lib/db/DbProvider";
 import {
@@ -27,9 +31,14 @@ import {
 import { getPlaceById } from "@/lib/db/places";
 import { getPhotosByTripPlaceId } from "@/lib/db/tripPlacePhotos";
 import { deletePhotoFile } from "@/lib/storage/photos";
+import { buildShareMessage, buildTripPdfHtml } from "@/lib/tripShare";
 import type { Trip, TripPlace } from "@/lib/db/types";
 
-type TripPlaceWithPlace = TripPlace & { placeName: string };
+type TripPlaceWithPlace = TripPlace & {
+  placeName: string;
+  latitude: number | null;
+  longitude: number | null;
+};
 
 export default function TripDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -45,13 +54,18 @@ export default function TripDetailScreen() {
   const loadData = async () => {
     if (!tripId || isNaN(tripId)) return;
     try {
-      const t = await getTripById(db, tripId);
-      setTrip(t ?? null);
+      const tripData = await getTripById(db, tripId);
+      setTrip(tripData ?? null);
       const tps = await getTripPlacesByTripId(db, tripId);
       const withNames: TripPlaceWithPlace[] = await Promise.all(
         tps.map(async (tp) => {
           const p = await getPlaceById(db, tp.placeId);
-          return { ...tp, placeName: p?.name ?? "?" };
+          return {
+            ...tp,
+            placeName: p?.name ?? "?",
+            latitude: p?.latitude ?? null,
+            longitude: p?.longitude ?? null,
+          };
         })
       );
       setTripPlaces(withNames);
@@ -148,6 +162,72 @@ export default function TripDetailScreen() {
   const handleEditPlace = (tp: TripPlaceWithPlace) =>
     router.push(`/trips/${tripId}/place/${tp.id}`);
 
+  const handleShareRoute = () => {
+    if (!trip) return;
+    const message = buildShareMessage(
+      trip,
+      tripPlaces.map((tp) => ({
+        placeName: tp.placeName,
+        latitude: tp.latitude,
+        longitude: tp.longitude,
+        order: tp.order,
+      })),
+      {
+        route: t("share.route"),
+        dates: t("share.dates"),
+        noCoords: t("share.noCoords"),
+      }
+    );
+    Share.share({ message, title: trip.title });
+  };
+
+  const handleExportPdf = async () => {
+    if (!trip) return;
+    try {
+      const photoMap = new Map<number, string>();
+      for (const tp of tripPlaces) {
+        const photos = await getPhotosByTripPlaceId(db, tp.id);
+        const first = photos[0];
+        if (first?.uri) {
+          try {
+            const base64 = await readAsStringAsync(first.uri, {
+              encoding: EncodingType.Base64,
+            });
+            if (base64) photoMap.set(tp.id, base64);
+          } catch {
+            // skip photo
+          }
+        }
+      }
+      const placesForPdf = tripPlaces.map((tp) => ({
+        id: tp.id,
+        placeName: tp.placeName,
+        latitude: tp.latitude,
+        longitude: tp.longitude,
+        visitDate: tp.visitDate,
+        notes: tp.notes,
+        order: tp.order,
+      }));
+      const html = buildTripPdfHtml(trip, placesForPdf, {
+        photoBase64ByTripPlaceId: photoMap,
+        routeHeading: t("trips.route"),
+      });
+      const { uri } = await Print.printToFileAsync({ html });
+      const available = await Sharing.isAvailableAsync();
+      if (available) {
+        await Sharing.shareAsync(uri, {
+          mimeType: "application/pdf",
+          dialogTitle: t("share.exportPdf"),
+        });
+      }
+    } catch (err) {
+      Alert.alert(
+        t("common.error"),
+        err instanceof Error ? err.message : t("share.exportPdfError")
+      );
+    }
+  };
+
   if (loading || !trip) {
     return (
       <View style={styles.container}>
@@ -189,6 +269,26 @@ export default function TripDetailScreen() {
                 {trip.description}
               </Text>
             ) : null}
+            <View style={styles.shareRow}>
+              <Button
+                mode="outlined"
+                compact
+                onPress={handleShareRoute}
+                icon="share-variant"
+                style={styles.shareButton}
+              >
+                {t("share.shareRoute")}
+              </Button>
+              <Button
+                mode="outlined"
+                compact
+                onPress={handleExportPdf}
+                icon="file-pdf-box"
+                style={styles.shareButton}
+              >
+                {t("share.exportPdf")}
+              </Button>
+            </View>
           </Card.Content>
         </Card>
 
@@ -288,4 +388,13 @@ const styles = StyleSheet.create({
   placeMain: { flex: 1 },
   visited: { color: "#4CAF50", marginTop: 2 },
   placeActions: { flexDirection: "row" },
+  shareRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 16,
+  },
+  shareButton: {
+    minWidth: 0,
+  },
 });

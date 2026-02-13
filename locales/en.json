@@ -92,6 +92,14 @@
     "addPlaceError": "Could not add place.",
     "createTripError": "Could not create trip."
   },
+  "share": {
+    "route": "Route",
+    "dates": "Dates",
+    "noCoords": "no coordinates",
+    "shareRoute": "Share route",
+    "exportPdf": "Export to PDF",
+    "exportPdfError": "Could not create PDF."
+  },
   "nextPlace": {
     "title": "Next place",
     "noNextPlace": "No next place",

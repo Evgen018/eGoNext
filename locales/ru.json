@@ -92,6 +92,14 @@
     "addPlaceError": "Не удалось добавить место.",
     "createTripError": "Не удалось создать поездку."
   },
+  "share": {
+    "route": "Маршрут",
+    "dates": "Даты",
+    "noCoords": "координаты не указаны",
+    "shareRoute": "Поделиться маршрутом",
+    "exportPdf": "Экспорт в PDF",
+    "exportPdfError": "Не удалось создать PDF."
+  },
   "nextPlace": {
     "title": "Следующее место",
     "noNextPlace": "Нет следующего места",
