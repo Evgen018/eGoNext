@@ -1,11 +1,20 @@
 import Constants from "expo-constants";
+import * as DocumentPicker from "expo-document-picker";
+import * as Sharing from "expo-sharing";
 import { useRouter } from "expo-router";
-import { View, StyleSheet, ScrollView, Pressable } from "react-native";
-import { Appbar, List, Text, Switch, Button } from "react-native-paper";
+import { useState } from "react";
+import { View, StyleSheet, ScrollView, Pressable, Alert } from "react-native";
+import { Appbar, List, Text, Switch, Button, ActivityIndicator } from "react-native-paper";
 import { useTranslation } from "react-i18next";
 import { useThemeContext, PRIMARY_COLOR_OPTIONS } from "@/lib/theme-context";
 import { MD3DarkTheme } from "react-native-paper";
 import { changeAppLanguage, type SupportedLanguage } from "@/lib/i18n";
+import { useDb } from "@/lib/db/DbProvider";
+import {
+  createBackupFile,
+  readBackupFile,
+  importFromBackupData,
+} from "@/lib/backup";
 
 const appName = Constants.expoConfig?.name ?? "GoNext";
 const version = Constants.expoConfig?.version ?? "1.0.0";
@@ -14,12 +23,75 @@ const DEFAULT_DARK_PRIMARY = MD3DarkTheme.colors.primary;
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const db = useDb();
   const { t, i18n } = useTranslation();
   const { isDark, setColorScheme, primaryColor, setPrimaryColor } = useThemeContext();
   const currentLang = (i18n.language === "en" ? "en" : "ru") as SupportedLanguage;
+  const [backupBusy, setBackupBusy] = useState(false);
 
   const handleLanguage = (lang: SupportedLanguage) => {
     changeAppLanguage(lang);
+  };
+
+  const handleExport = async () => {
+    setBackupBusy(true);
+    try {
+      const fileUri = await createBackupFile(db);
+      const available = await Sharing.isAvailableAsync();
+      if (available) {
+        await Sharing.shareAsync(fileUri, {
+          mimeType: "application/json",
+          dialogTitle: t("backup.share"),
+        });
+        Alert.alert(t("common.done"), t("backup.exportSuccess"));
+      } else {
+        Alert.alert(t("common.done"), t("backup.exportSuccess"));
+      }
+    } catch (err) {
+      Alert.alert(
+        t("common.error"),
+        err instanceof Error ? err.message : t("backup.exportError")
+      );
+    } finally {
+      setBackupBusy(false);
+    }
+  };
+
+  const handleImport = () => {
+    Alert.alert(
+      t("backup.import"),
+      t("backup.importConfirm"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("common.yes"),
+          onPress: async () => {
+            setBackupBusy(true);
+            try {
+              const result = await DocumentPicker.getDocumentAsync({
+                type: "application/json",
+                copyToCacheDirectory: true,
+              });
+              if (result.canceled || !result.assets?.[0]) return;
+              const uri = result.assets[0].uri;
+              const data = await readBackupFile(uri);
+              await importFromBackupData(db, data);
+              Alert.alert(t("common.done"), t("backup.importSuccess"));
+            } catch (err) {
+              const msg =
+                err instanceof Error && err.message.includes("Invalid")
+                  ? t("backup.importInvalidFile")
+                  : err instanceof Error
+                    ? err.message
+                    : t("backup.importError");
+              Alert.alert(t("common.error"), msg);
+            } finally {
+              setBackupBusy(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -94,6 +166,37 @@ export default function SettingsScreen() {
           </View>
         </List.Section>
         <List.Section>
+          <List.Subheader>{t("backup.title")}</List.Subheader>
+          <List.Item
+            title={t("backup.export")}
+            description={t("backup.exportDescription")}
+            left={(props) => <List.Icon {...props} icon="export" />}
+            right={() =>
+              backupBusy ? (
+                <ActivityIndicator size="small" style={styles.backupSpinner} />
+              ) : (
+                <Button mode="contained-tonal" compact onPress={handleExport}>
+                  {t("backup.share")}
+                </Button>
+              )
+            }
+            onPress={backupBusy ? undefined : handleExport}
+            disabled={backupBusy}
+          />
+          <List.Item
+            title={t("backup.import")}
+            description={t("backup.importDescription")}
+            left={(props) => <List.Icon {...props} icon="import" />}
+            right={() =>
+              backupBusy ? (
+                <ActivityIndicator size="small" style={styles.backupSpinner} />
+              ) : null
+            }
+            onPress={backupBusy ? undefined : handleImport}
+            disabled={backupBusy}
+          />
+        </List.Section>
+        <List.Section>
           <List.Subheader>{t("settings.about")}</List.Subheader>
           <List.Item
             title={appName}
@@ -148,5 +251,8 @@ const styles = StyleSheet.create({
   },
   langButton: {
     minWidth: 64,
+  },
+  backupSpinner: {
+    marginRight: 8,
   },
 });

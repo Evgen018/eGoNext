@@ -133,5 +133,19 @@
     "appDescription": "Travel diary",
     "version": "Version",
     "aboutText": "Plan trips and keep a travel diary. Works fully offline. Data is stored locally on your device."
+  },
+  "backup": {
+    "title": "Backup & Restore",
+    "export": "Export data",
+    "exportDescription": "Save to folder or send to cloud",
+    "exportSuccess": "Backup created. Choose where to save or share the file.",
+    "exportError": "Could not create backup.",
+    "import": "Import data",
+    "importDescription": "Restore from a previously saved file",
+    "importConfirm": "Replace all current data with data from the file?",
+    "importSuccess": "Data restored successfully.",
+    "importError": "Could not restore data.",
+    "importInvalidFile": "Invalid backup file.",
+    "share": "Share / Save"
   }
 }
