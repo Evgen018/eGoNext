@@ -2,8 +2,10 @@ import { Stack } from "expo-router";
 import { BackgroundLayout } from "@/lib/BackgroundLayout";
 import { useThemeContext } from "@/lib/theme-context";
 
-/** Фон только для экранов внутри /settings. В тёмной теме не показываем. */
-const SETTINGS_BACKGROUND = require("../../assets/images/settings-bg.png");
+/** Фон только для экранов внутри /settings. В тёмной теме не показываем. В release — placeholder (большие PNG ломают AAPT). */
+const SETTINGS_BACKGROUND = __DEV__
+  ? require("../../assets/images/settings-bg.png")
+  : require("../../assets/images/placeholder-bg.png");
 
 export default function SettingsLayout() {
   const { theme, isDark } = useThemeContext();

@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import { View, StyleSheet, type ImageSourcePropType } from "react-native";
 
-/** На web при сборке Metro может отдать require() как строку URL. Путь относительно lib/. */
-const WEB_FALLBACK_BG = require("../assets/images/egonext-bg.png");
+/** На web при сборке Metro может отдать require() как строку URL. В release — маленький placeholder. */
+const WEB_FALLBACK_BG = __DEV__
+  ? require("../assets/images/egonext-bg.png")
+  : require("../assets/images/placeholder-bg.png");
 
 type Props = {
   source?: ImageSourcePropType | null;

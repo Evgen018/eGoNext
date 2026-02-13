@@ -12,7 +12,10 @@
       "bundleIdentifier": "com.egonext.app"
     },
     "android": {
-      "package": "com.egonext.app"
+      "package": "com.egonext.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -23,7 +26,14 @@
           "photosPermission": "Приложение использует галерею для прикрепления фотографий к местам и поездкам.",
           "cameraPermission": "Приложение использует камеру для съёмки фотографий мест и поездок."
         }
-      ]
-    ]
+      ],
+      ["expo-build-properties",{"android":{"compileSdkVersion":35,"targetSdkVersion":35,"buildToolsVersion":"35.0.0"}}]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c9b28b01-62b0-44f7-abc5-d2a4334566be"
+      }
+    }
   }
 }

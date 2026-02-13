@@ -10,8 +10,10 @@ import { MapPickerProvider } from "@/lib/MapPickerContext";
 import { BackgroundLayout } from "@/lib/BackgroundLayout";
 import { loadStoredLanguage } from "@/lib/i18n";
 
-/** Фон для ВСЕХ экранов. В тёмной теме не показываем. */
-const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType = require("../assets/images/egonext-bg.png");
+/** Фон для ВСЕХ экранов. В тёмной теме не показываем. В release — маленький placeholder (большие PNG ломают AAPT). */
+const GLOBAL_BACKGROUND: import("react-native").ImageSourcePropType = __DEV__
+  ? require("../assets/images/egonext-bg.png")
+  : require("../assets/images/placeholder-bg.png");
 
 function AppContent() {
   const { theme, isDark } = useThemeContext();
